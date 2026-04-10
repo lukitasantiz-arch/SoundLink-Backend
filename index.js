@@ -1,9 +1,13 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const axios = require('axios');
+const cheerio = require('cheerio');
 const db = require('./database');
 const app = express();
 const PORT = 3000;
 
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
@@ -80,6 +84,7 @@ app.get('/publicaciones', (req, res) => {
         SELECT publicaciones.id, publicaciones.contenido, publicaciones.fecha_publicacion, usuarios.nombre
         FROM publicaciones
         JOIN usuarios ON publicaciones.usuario_id = usuarios.id
+        ORDER BY publicaciones.id DESC
     `;
 
     db.query(sql, (err, results) => {
@@ -106,7 +111,29 @@ app.post('/publicaciones', (req, res) => {
             return res.status(500).send('Error al crear publicación: ' + err.message);
         }
 
-        res.send('Publicación creada');
+        res.json({
+            mensaje: 'Publicación creada',
+            id: result.insertId
+        });
+    });
+});
+
+app.delete('/publicaciones/:id', (req, res) => {
+    const publicacionId = req.params.id;
+
+    const sql = 'DELETE FROM publicaciones WHERE id = ?';
+
+    db.query(sql, [publicacionId], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error al borrar publicación: ' + err.message);
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).send('Publicación no encontrada');
+        }
+
+        res.send('Publicación eliminada');
     });
 });
 
@@ -159,6 +186,94 @@ app.delete('/conciertos/:id', requireRole('admin'), (req, res) => {
 
     conciertos.splice(index, 1);
     res.send("Concierto eliminado (solo admin)");
+});
+
+// ===== CONCIERTOS REALES (Movistar Arena / fallback) =====
+app.get('/conciertos-reales', async (req, res) => {
+    try {
+        const url = 'https://www.movistararena.es/calendario?categoria=Conciertos';
+        const respuesta = await axios.get(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0'
+            }
+        });
+
+        const html = respuesta.data;
+        const $ = cheerio.load(html);
+
+        const conciertos = [];
+
+        $('a').each((i, elem) => {
+            const enlace = $(elem).attr('href');
+            const texto = $(elem).text().replace(/\s+/g, ' ').trim();
+
+            if (
+                enlace &&
+                enlace.includes('/informacion') &&
+                texto.length > 3 &&
+                texto.length < 120 &&
+                !conciertos.some(c => c.titulo === texto)
+            ) {
+                conciertos.push({
+                    titulo: texto,
+                    lugar: 'Movistar Arena Madrid',
+                    fecha: 'Consultar web oficial',
+                    enlace: enlace.startsWith('http')
+                        ? enlace
+                        : 'https://www.movistararena.es' + enlace
+                });
+            }
+        });
+
+        if (conciertos.length === 0) {
+            return res.json([
+                {
+                    titulo: '5SOS',
+                    lugar: 'Movistar Arena Madrid',
+                    fecha: 'Próximamente',
+                    enlace: 'https://www.movistararena.es/programacion/'
+                },
+                {
+                    titulo: 'Walls - Madrid',
+                    lugar: 'Movistar Arena Madrid',
+                    fecha: 'Próximamente',
+                    enlace: 'https://www.movistararena.es/programacion/'
+                },
+                {
+                    titulo: 'Bring Me The Horizon',
+                    lugar: 'Movistar Arena Madrid',
+                    fecha: 'Próximamente',
+                    enlace: 'https://www.movistararena.es/programacion/'
+                }
+            ]);
+        }
+
+        res.json(conciertos.slice(0, 10));
+
+    } catch (error) {
+        console.log('Error al obtener conciertos reales:', error.message);
+
+        res.json([
+            {
+                titulo: '5SOS',
+                lugar: 'Movistar Arena Madrid',
+                fecha: 'Próximamente',
+                enlace: 'https://www.movistararena.es/programacion/'
+            },
+            {
+                titulo: 'Walls - Madrid',
+                lugar: 'Movistar Arena Madrid',
+                fecha: 'Próximamente',
+                enlace: 'https://www.movistararena.es/programacion/'
+            },
+            {
+                titulo: 'Bring Me The Horizon',
+                lugar: 'Movistar Arena Madrid',
+                fecha: 'Próximamente',
+                enlace: 'https://www.movistararena.es/programacion/'
+            }
+        ]);
+    }
 });
 
 // ===== INICIAR SERVIDOR =====
