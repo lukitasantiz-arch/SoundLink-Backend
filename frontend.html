@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundLink</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #BEEAFA;
+            color: #2d3b63;
+        }
+
+        .pantalla {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .activa {
+            display: block;
+        }
+
+        .contenedor-login {
+            max-width: 420px;
+            margin: 40px auto;
+            background-color: #dff4ff;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-login {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-circulo {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%;
+            background-color: #70AAFA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+        }
+
+        .logo-login h1 {
+            margin: 0;
+            color: #70AAFA;
+            font-size: 52px;
+        }
+
+        .logo-login p {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .grupo-formulario {
+            margin-bottom: 20px;
+        }
+
+        .grupo-formulario label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .grupo-formulario input,
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #c9e7f5;
+            border-radius: 12px;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .grupo-formulario input {
+            background-color: white;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            border-radius: 15px;
+        }
+
+        .btn-principal {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 15px;
+            background-color: #70AAFA;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .btn-principal:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secundario {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background-color: #6BFAC3;
+            color: #1f2a44;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .texto-login {
+            text-align: center;
+            margin-top: 20px;
+            color: #70AAFA;
+            font-weight: bold;
+        }
+
+        .app {
+            max-width: 500px;
+            margin: 20px auto;
+            background-color: #f5fcff;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        }
+
+        .cabecera {
+            background-color: #70AAFA;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .cabecera h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .cabecera p {
+            margin-top: 8px;
+            margin-bottom: 0;
+            font-size: 16px;
+        }
+
+        .contenido {
+            padding: 18px;
+            padding-bottom: 90px;
+        }
+
+        .tarjeta {
+            background-color: white;
+            border: 1px solid #d6eef9;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 18px;
+        }
+
+        .tarjeta h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #3b4b73;
+        }
+
+        .mensaje-info {
+            text-align: center;
+            color: #3b4b73;
+            margin-top: 8px;
+            min-height: 20px;
+        }
+
+        .post,
+        .mensaje-chat,
+        .evento {
+            background-color: #ffffff;
+            border: 1px solid #d6eef9;
+            border-radius: 15px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .post-usuario {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .post-tiempo,
+        .mensaje-tiempo {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .post-texto {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .acciones-post,
+        .mensaje-acciones,
+        .cookies-botones {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .acciones-post button,
+        .mensaje-acciones button,
+        .cookies-botones button {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .acciones-post button,
+        .mensaje-acciones button {
+            background-color: #BEEAFA;
+            color: #2d3b63;
+        }
+
+        .btn-like {
+            color: #d1002c !important;
+            background-color: #ffe6ec !important;
+        }
+
+        .btn-borrar {
+            background-color: #ffdddd !important;
+            color: #a30000 !important;
+        }
+
+        .comentarios {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #e5f3fa;
+            display: none;
+        }
+
+        .comentarios p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+
+        .mensaje-chat strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .mensaje-chat p {
+            margin: 0 0 10px 0;
+        }
+
+        .respuesta {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #eef8fd;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .evento h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #3b4b73;
+        }
+
+        .evento p {
+            margin: 6px 0;
+        }
+
+        .evento a {
+            color: #70AAFA;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .evento a:hover {
+            text-decoration: underline;
+        }
+
+        .barra-navegacion {
+            position: sticky;
+            bottom: 0;
+            display: flex;
+            justify-content: space-around;
+            background-color: #eef8fd;
+            border-top: 1px solid #d6eef9;
+            padding: 12px 8px;
+        }
+
+        .btn-nav {
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #3b4b73;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-nav.activo {
+            color: #70AAFA;
+        }
+
+        .oculto {
+            display: none;
+        }
+
+        .cookies-banner {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            border: 1px solid #d6eef9;
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.12);
+            z-index: 1000;
+        }
+
+        .cookies-banner p {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .btn-aceptar {
+            flex: 1;
+            background-color: #70AAFA;
+            color: white;
+        }
+
+        .btn-rechazar {
+            flex: 1;
+            background-color: #e9f6fd;
+            color: #2d3b63;
+        }
+
+        .estado-cookies {
+            background-color: #eef8fd;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pantallaLogin" class="pantalla activa">
+        <div class="contenedor-login">
+            <div class="logo-login">
+                <div class="logo-circulo">♪</div>
+                <h1>SoundLink</h1>
+                <p>Conecta con la música</p>
+            </div>
+
+            <div class="grupo-formulario">
+                <label for="usuarioLogin">Usuario</label>
+                <input type="text" id="usuarioLogin" placeholder="Ingresa tu usuario">
+            </div>
+
+            <div class="grupo-formulario">
+                <label for="passwordLogin">Contraseña</label>
+                <input type="text" id="passwordLogin" placeholder="Ingresa tu contraseña">
+            </div>
+
+            <button class="btn-principal" id="btnLogin">Iniciar sesión</button>
+            <div class="texto-login">Demo funcional del frontend</div>
+        </div>
+    </div>
+
+    <div id="pantallaApp" class="pantalla">
+        <div class="app">
+            <div class="cabecera">
+                <h1>SoundLink</h1>
+                <p id="saludoUsuario">Bienvenido</p>
+            </div>
+
+            <div class="contenido">
+                <div id="seccionFeed">
+                    <div class="tarjeta">
+                        <h2>Crear publicación</h2>
+                        <textarea id="contenidoPublicacion" rows="3" placeholder="Escribe algo sobre música, conciertos o artistas"></textarea>
+                        <button class="btn-principal" id="btnPublicar">Publicar</button>
+                        <div id="mensajePublicacion" class="mensaje-info"></div>
+                    </div>
+
+                    <div class="tarjeta">
+                        <h2>Feed musical</h2>
+                        <div id="listaPublicaciones"></div>
+                    </div>
+                </div>
+
+                <div id="seccionMensajes" class="oculto">
+                    <div class="tarjeta">
+                        <h2>Mensajes</h2>
+                        <input type="text" id="destinatarioMensaje" placeholder="Escribe el nombre del destinatario">
+                        <textarea id="textoMensaje" rows="3" placeholder="Escribe un mensaje"></textarea>
+                        <button class="btn-principal" id="btnEnviarMensaje">Enviar mensaje</button>
+                        <div id="listaMensajes"></div>
+                    </div>
+                </div>
+
+                <div id="seccionConciertos" class="oculto">
+                    <div class="tarjeta">
+                        <h2>Conciertos</h2>
+                        <div id="listaConciertosReales"></div>
+                    </div>
+                </div>
+
+                <div id="seccionPerfil" class="oculto">
+                    <div class="tarjeta">
+                        <h2>Perfil</h2>
+                        <p><strong>Usuario:</strong> <span id="nombrePerfil"></span></p>
+                        <p><strong>Descripción:</strong> Me gusta descubrir música nueva, compartir canciones y organizar planes para conciertos.</p>
+                        <p><strong>Artistas favoritos:</strong> 5SOS, Taylor Swift, Walls y BMTH</p>
+
+                        <div class="estado-cookies">
+                            <p><strong>Estado de cookies:</strong> <span id="estadoCookiesTexto">No decidido</span></p>
+                            <button class="btn-secundario" id="btnCambiarCookies">Volver a elegir cookies</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="barra-navegacion">
+                <button class="btn-nav activo" id="navInicio">Inicio</button>
+                <button class="btn-nav" id="navMensajes">Mensajes</button>
+                <button class="btn-nav" id="navConciertos">Conciertos</button>
+                <button class="btn-nav" id="navPerfil">Perfil</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cookiesBanner" class="cookies-banner">
+        <p>Esta demo utiliza cookies para guardar la sesión y la preferencia de uso. ¿Quieres aceptarlas?</p>
+        <div class="cookies-botones">
+            <button id="btnAceptarCookies" class="btn-aceptar">Aceptar</button>
+            <button id="btnRechazarCookies" class="btn-rechazar">Rechazar</button>
+        </div>
+    </div>
+
+    <script>
+        const pantallaLogin = document.getElementById("pantallaLogin");
+        const pantallaApp = document.getElementById("pantallaApp");
+
+        const usuarioLogin = document.getElementById("usuarioLogin");
+        const passwordLogin = document.getElementById("passwordLogin");
+        const btnLogin = document.getElementById("btnLogin");
+
+        const saludoUsuario = document.getElementById("saludoUsuario");
+        const nombrePerfil = document.getElementById("nombrePerfil");
+        const estadoCookiesTexto = document.getElementById("estadoCookiesTexto");
+        const btnCambiarCookies = document.getElementById("btnCambiarCookies");
+
+        const seccionFeed = document.getElementById("seccionFeed");
+        const seccionMensajes = document.getElementById("seccionMensajes");
+        const seccionConciertos = document.getElementById("seccionConciertos");
+        const seccionPerfil = document.getElementById("seccionPerfil");
+
+        const navInicio = document.getElementById("navInicio");
+        const navMensajes = document.getElementById("navMensajes");
+        const navConciertos = document.getElementById("navConciertos");
+        const navPerfil = document.getElementById("navPerfil");
+
+        const contenidoPublicacion = document.getElementById("contenidoPublicacion");
+        const btnPublicar = document.getElementById("btnPublicar");
+        const mensajePublicacion = document.getElementById("mensajePublicacion");
+        const listaPublicaciones = document.getElementById("listaPublicaciones");
+
+        const destinatarioMensaje = document.getElementById("destinatarioMensaje");
+        const textoMensaje = document.getElementById("textoMensaje");
+        const btnEnviarMensaje = document.getElementById("btnEnviarMensaje");
+        const listaMensajes = document.getElementById("listaMensajes");
+
+        const listaConciertosReales = document.getElementById("listaConciertosReales");
+
+        const cookiesBanner = document.getElementById("cookiesBanner");
+        const btnAceptarCookies = document.getElementById("btnAceptarCookies");
+        const btnRechazarCookies = document.getElementById("btnRechazarCookies");
+
+        let usuarioActual = "";
+
+        let publicacionesUsuario = [];
+
+        const publicacionesFake = [
+            {
+                id: "fake1",
+                usuario: "Carlos Ruiz",
+                tiempo: "Hace 2 horas",
+                contenido: "El concierto de Walls estuvo genial. El ambiente fue buenísimo y acabé con ganas de repetir.",
+                likes: 12,
+                comentarios: ["Yo quiero ir al próximo.", "Walls en directo gana muchísimo."],
+                esMia: false
+            },
+            {
+                id: "fake2",
+                usuario: "María López",
+                tiempo: "Hace 5 horas",
+                contenido: "Hoy he estado escuchando 5SOS toda la tarde. Ojalá vuelvan pronto con una gira nueva.",
+                likes: 18,
+                comentarios: ["Literalmente yo todos los días.", "Su último disco me encanta."],
+                esMia: false
+            },
+            {
+                id: "fake3",
+                usuario: "David Martín",
+                tiempo: "Hace 1 día",
+                contenido: "Sigo esperando noticias de Taylor Swift en España porque sería un concierto increíble.",
+                likes: 31,
+                comentarios: ["Sería histórico.", "Yo iría sin pensarlo."],
+                esMia: false
+            }
+        ];
+
+        let mensajesDemo = [
+            {
+                id: 1,
+                de: "Marta",
+                para: "Tú",
+                contenido: "¿Te apetece quedar antes del concierto de Walls y entrar juntos?",
+                tiempo: "Hace 1 hora",
+                esMio: false
+            },
+            {
+                id: 2,
+                de: "Sergio",
+                para: "Tú",
+                contenido: "He visto entradas para BMTH, tenemos que mirarlo.",
+                tiempo: "Hace 3 horas",
+                esMio: false
+            }
+        ];
+
+        const conciertosDemo = [
+            {
+                titulo: "Walls en Madrid",
+                lugar: "WiZink Center",
+                fecha: "20/05/2026",
+                enlace: "#"
+            },
+            {
+                titulo: "Bring Me The Horizon",
+                lugar: "Palacio Vistalegre",
+                fecha: "02/06/2026",
+                enlace: "#"
+            },
+            {
+                titulo: "5SOS Tour",
+                lugar: "Barcelona",
+                fecha: "15/07/2026",
+                enlace: "#"
+            }
+        ];
+
+        function setCookie(nombre, valor, dias) {
+            const fecha = new Date();
+            fecha.setTime(fecha.getTime() + (dias * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + fecha.toUTCString();
+            document.cookie = nombre + "=" + encodeURIComponent(valor) + ";" + expires + ";path=/";
+        }
+
+        function getCookie(nombre) {
+            const nombreBuscado = nombre + "=";
+            const cookies = document.cookie.split(";");
+
+            for (let i = 0; i < cookies.length; i++) {
+                let c = cookies[i].trim();
+                if (c.indexOf(nombreBuscado) === 0) {
+                    return decodeURIComponent(c.substring(nombreBuscado.length));
+                }
+            }
+
+            return null;
+        }
+
+        function deleteCookie(nombre) {
+            document.cookie = nombre + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+
+        function actualizarEstadoCookies() {
+            const valor = getCookie("cookiesAceptadas");
+
+            if (valor === "si") {
+                estadoCookiesTexto.textContent = "Aceptadas";
+            } else if (valor === "no") {
+                estadoCookiesTexto.textContent = "Rechazadas";
+            } else {
+                estadoCookiesTexto.textContent = "No decidido";
+            }
+        }
+
+        function revisarBannerCookies() {
+            const valor = getCookie("cookiesAceptadas");
+
+            if (valor === "si" || valor === "no") {
+                cookiesBanner.style.display = "none";
+            } else {
+                cookiesBanner.style.display = "block";
+            }
+        }
+
+        btnAceptarCookies.addEventListener("click", function () {
+            setCookie("cookiesAceptadas", "si", 30);
+            cookiesBanner.style.display = "none";
+            actualizarEstadoCookies();
+        });
+
+        btnRechazarCookies.addEventListener("click", function () {
+            setCookie("cookiesAceptadas", "no", 30);
+            cookiesBanner.style.display = "none";
+            actualizarEstadoCookies();
+        });
+
+        btnCambiarCookies.addEventListener("click", function () {
+            deleteCookie("cookiesAceptadas");
+            revisarBannerCookies();
+            actualizarEstadoCookies();
+        });
+
+        function ocultarSecciones() {
+            seccionFeed.classList.add("oculto");
+            seccionMensajes.classList.add("oculto");
+            seccionConciertos.classList.add("oculto");
+            seccionPerfil.classList.add("oculto");
+        }
+
+        function quitarActivoNav() {
+            navInicio.classList.remove("activo");
+            navMensajes.classList.remove("activo");
+            navConciertos.classList.remove("activo");
+            navPerfil.classList.remove("activo");
+        }
+
+        function mostrarSeccion(seccion) {
+            ocultarSecciones();
+            quitarActivoNav();
+
+            if (seccion === "feed") {
+                seccionFeed.classList.remove("oculto");
+                navInicio.classList.add("activo");
+            }
+
+            if (seccion === "mensajes") {
+                seccionMensajes.classList.remove("oculto");
+                navMensajes.classList.add("activo");
+                cargarMensajes();
+            }
+
+            if (seccion === "conciertos") {
+                seccionConciertos.classList.remove("oculto");
+                navConciertos.classList.add("activo");
+                cargarConciertos();
+            }
+
+            if (seccion === "perfil") {
+                seccionPerfil.classList.remove("oculto");
+                navPerfil.classList.add("activo");
+                actualizarEstadoCookies();
+            }
+        }
+
+        navInicio.addEventListener("click", function () {
+            mostrarSeccion("feed");
+        });
+
+        navMensajes.addEventListener("click", function () {
+            mostrarSeccion("mensajes");
+        });
+
+        navConciertos.addEventListener("click", function () {
+            mostrarSeccion("conciertos");
+        });
+
+        navPerfil.addEventListener("click", function () {
+            mostrarSeccion("perfil");
+        });
+
+        btnLogin.addEventListener("click", function () {
+            const usuario = usuarioLogin.value.trim();
+            const password = passwordLogin.value.trim();
+
+            if (usuario === "" || password === "") {
+                alert("Tienes que escribir un usuario y una contraseña");
+                return;
+            }
+
+            usuarioActual = usuario;
+
+            setCookie("usuarioSoundLink", usuarioActual, 1);
+
+            saludoUsuario.textContent = "Bienvenido, " + usuarioActual;
+            nombrePerfil.textContent = usuarioActual;
+
+            pantallaLogin.classList.remove("activa");
+            pantallaApp.classList.add("activa");
+
+            actualizarEstadoCookies();
+            revisarBannerCookies();
+            mostrarSeccion("feed");
+            cargarPublicaciones();
+            cargarMensajes();
+        });
+
+        function crearHTMLComentarios(comentarios) {
+            let html = "";
+
+            for (let i = 0; i < comentarios.length; i++) {
+                html += "<p>• " + comentarios[i] + "</p>";
+            }
+
+            return html;
+        }
+
+        btnPublicar.addEventListener("click", async function () {
+            const texto = contenidoPublicacion.value.trim();
+
+            if (texto === "") {
+                mensajePublicacion.textContent = "Escribe algo antes de publicar";
+                return;
+            }
+
+            const nuevaPublicacion = {
+                id: Date.now(),
+                usuario: usuarioActual,
+                tiempo: "Hace un momento",
+                contenido: texto,
+                likes: 0,
+                comentarios: ["Sé el primero en comentar."],
+                esMia: true
+            };
+
+            try {
+                await fetch("http://localhost:3000/publicaciones", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        contenido: texto,
+                        usuario_id: 1
+                    })
+                });
+            } catch (error) {
+                console.log("No se pudo guardar en el backend, pero se mostrará en la demo.");
+            }
+
+            publicacionesUsuario.unshift(nuevaPublicacion);
+            contenidoPublicacion.value = "";
+            mensajePublicacion.textContent = "Publicación creada";
+            cargarPublicaciones();
+
+            setTimeout(function () {
+                mensajePublicacion.textContent = "";
+            }, 2500);
+        });
+
+        function cargarPublicaciones() {
+            listaPublicaciones.innerHTML = "";
+
+            const publicacionesTotales = [...publicacionesUsuario, ...publicacionesFake];
+
+            for (let i = 0; i < publicacionesTotales.length; i++) {
+                const pub = publicacionesTotales[i];
+
+                const divPost = document.createElement("div");
+                divPost.className = "post";
+
+                divPost.innerHTML = `
+                    <div class="post-usuario">${pub.usuario}</div>
+                    <div class="post-tiempo">${pub.tiempo}</div>
+                    <div class="post-texto">${pub.contenido}</div>
+                    <div class="acciones-post">
+                        <button class="btn-like">❤️ ${pub.likes}</button>
+                        <button class="btn-comentarios">Comentarios</button>
+                        <button class="btn-borrar">Borrar</button>
+                    </div>
+                    <div class="comentarios">
+                        ${crearHTMLComentarios(pub.comentarios)}
+                    </div>
+                `;
+
+                const btnLike = divPost.querySelector(".btn-like");
+                const btnComentarios = divPost.querySelector(".btn-comentarios");
+                const btnBorrar = divPost.querySelector(".btn-borrar");
+                const cajaComentarios = divPost.querySelector(".comentarios");
+
+                btnLike.addEventListener("click", function () {
+                    pub.likes++;
+                    btnLike.textContent = "❤️ " + pub.likes;
+                });
+
+                btnComentarios.addEventListener("click", function () {
+                    if (cajaComentarios.style.display === "block") {
+                        cajaComentarios.style.display = "none";
+                    } else {
+                        cajaComentarios.style.display = "block";
+                    }
+                });
+
+                btnBorrar.addEventListener("click", async function () {
+                    if (pub.esMia) {
+                        try {
+                            await fetch("http://localhost:3000/publicaciones/" + pub.id, {
+                                method: "DELETE"
+                            });
+                        } catch (error) {
+                            console.log("No se pudo borrar en backend, pero se borra de la demo.");
+                        }
+
+                        publicacionesUsuario = publicacionesUsuario.filter(function (p) {
+                            return p.id !== pub.id;
+                        });
+                    } else {
+                        const index = publicacionesFake.findIndex(function (p) {
+                            return p.id === pub.id;
+                        });
+
+                        if (index !== -1) {
+                            publicacionesFake.splice(index, 1);
+                        }
+                    }
+
+                    cargarPublicaciones();
+                });
+
+                listaPublicaciones.appendChild(divPost);
+            }
+        }
+
+        btnEnviarMensaje.addEventListener("click", function () {
+            const destinatario = destinatarioMensaje.value.trim();
+            const texto = textoMensaje.value.trim();
+
+            if (destinatario === "" || texto === "") {
+                alert("Tienes que escribir destinatario y mensaje");
+                return;
+            }
+
+            const nuevoMensaje = {
+                id: Date.now(),
+                de: usuarioActual,
+                para: destinatario,
+                contenido: texto,
+                tiempo: "Hace un momento",
+                esMio: true
+            };
+
+            mensajesDemo.unshift(nuevoMensaje);
+            destinatarioMensaje.value = "";
+            textoMensaje.value = "";
+            cargarMensajes();
+        });
+
+        function cargarMensajes() {
+            listaMensajes.innerHTML = "";
+
+            if (mensajesDemo.length === 0) {
+                listaMensajes.innerHTML = "<p>No hay mensajes disponibles.</p>";
+                return;
+            }
+
+            for (let i = 0; i < mensajesDemo.length; i++) {
+                const mensaje = mensajesDemo[i];
+
+                const divMensaje = document.createElement("div");
+                divMensaje.className = "mensaje-chat";
+
+                divMensaje.innerHTML = `
+                    <strong>${mensaje.de} → ${mensaje.para}</strong>
+                    <div class="mensaje-tiempo">${mensaje.tiempo}</div>
+                    <p>${mensaje.contenido}</p>
+                    <div class="mensaje-acciones">
+                        <button class="btn-borrar">Borrar mensaje</button>
+                    </div>
+                `;
+
+                const btnBorrarMensaje = divMensaje.querySelector(".btn-borrar");
+
+                btnBorrarMensaje.addEventListener("click", function () {
+                    mensajesDemo = mensajesDemo.filter(function (m) {
+                        return m.id !== mensaje.id;
+                    });
+
+                    cargarMensajes();
+                });
+
+                listaMensajes.appendChild(divMensaje);
+            }
+        }
+
+        function cargarConciertos() {
+            listaConciertosReales.innerHTML = "";
+
+            for (let i = 0; i < conciertosDemo.length; i++) {
+                const concierto = conciertosDemo[i];
+
+                const divEvento = document.createElement("div");
+                divEvento.className = "evento";
+
+                divEvento.innerHTML = `
+                    <h3>${concierto.titulo}</h3>
+                    <p><strong>Lugar:</strong> ${concierto.lugar}</p>
+                    <p><strong>Fecha:</strong> ${concierto.fecha}</p>
+                    <p><a href="${concierto.enlace}" target="_blank">Ver concierto</a></p>
+                `;
+
+                listaConciertosReales.appendChild(divEvento);
+            }
+        }
+
+        function comprobarSesion() {
+            const usuarioGuardado = getCookie("usuarioSoundLink");
+
+            if (usuarioGuardado) {
+                usuarioActual = usuarioGuardado;
+                saludoUsuario.textContent = "Bienvenido, " + usuarioActual;
+                nombrePerfil.textContent = usuarioActual;
+
+                pantallaLogin.classList.remove("activa");
+                pantallaApp.classList.add("activa");
+
+                actualizarEstadoCookies();
+                revisarBannerCookies();
+                mostrarSeccion("feed");
+                cargarPublicaciones();
+                cargarMensajes();
+            } else {
+                actualizarEstadoCookies();
+                revisarBannerCookies();
+            }
+        }
+
+        comprobarSesion();
+    </script>
+</body>
+</html>
