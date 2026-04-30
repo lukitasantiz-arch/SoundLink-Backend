@@ -1,282 +1,264 @@
+// ============================================================
+// SoundLink - Backend completo
+// Luka Sánchez Tello | 2º DAM
+// ============================================================
+
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const mysql = require('mysql2/promise');
 const cors = require('cors');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const db = require('./database');
+const path = require('path');
+
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
+console.log('✅ Backend SoundLink iniciado');
+
+// ============================================================
+// MIDDLEWARES
+// ============================================================
+
 app.use(express.json());
 app.use(cookieParser());
 
-// ===== Usuarios de prueba =====
-let usuarios = [
-    { id: 1, nombre: "Luka", rol: "usuario" },
-    { id: 2, nombre: "Admin", rol: "admin" }
-];
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 
-let mensajes = [];
-let conciertos = [];
+app.use(express.static(path.join(__dirname)));
 
-// ===== Middleware para verificar rol =====
-function requireRole(rol) {
-    return (req, res, next) => {
-        const usuarioId = req.cookies.usuarioId;
-        const usuario = usuarios.find(u => u.id == usuarioId);
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend.html'));
+});
 
-        if (!usuario) return res.status(401).send("No logueado");
-        if (usuario.rol !== rol) return res.status(403).send("No tienes permisos");
+// ============================================================
+// CONEXIÓN MYSQL
+// ============================================================
 
-        next();
-    };
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'root1234',
+    database: 'soundlink',
+    waitForConnections: true,
+    connectionLimit: 10
+});
+
+async function comprobarConexion() {
+    try {
+        await pool.query('SELECT 1');
+        console.log('✅ MySQL conectado');
+    } catch (error) {
+        console.error('❌ Error MySQL:', error.message);
+    }
 }
 
-// ===== LOGIN =====
-app.post('/login', (req, res) => {
-    const { id } = req.body;
-    const usuario = usuarios.find(u => u.id == id);
+// ============================================================
+// MIDDLEWARES LOGIN
+// ============================================================
 
-    if (!usuario) return res.status(404).send("Usuario no encontrado");
+async function obtenerUsuario(req) {
+    const id = req.cookies.usuarioId;
+    if (!id) return null;
 
-    res.cookie('usuarioId', usuario.id, { maxAge: 3600000 });
-    res.send(`Usuario ${usuario.nombre} logueado`);
+    const [res] = await pool.query(
+        'SELECT id, nombre, email, rol FROM usuarios WHERE id = ?',
+        [id]
+    );
+
+    return res[0] || null;
+}
+
+async function requiereLogin(req, res, next) {
+    const usuario = await obtenerUsuario(req);
+    if (!usuario) {
+        return res.status(401).json({ error: 'Debes iniciar sesión' });
+    }
+    req.usuario = usuario;
+    next();
+}
+
+async function requiereAdmin(req, res, next) {
+    const usuario = await obtenerUsuario(req);
+    if (!usuario) return res.status(401).json({ error: 'No logueado' });
+
+    if (usuario.rol !== 'admin') {
+        return res.status(403).json({ error: 'No eres admin' });
+    }
+
+    req.usuario = usuario;
+    next();
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+
+app.post('/registro', async (req, res) => {
+    const { nombre, email, password } = req.body;
+
+    if (!nombre || !email || !password) {
+        return res.status(400).json({ error: 'Faltan datos' });
+    }
+
+    const [existe] = await pool.query(
+        'SELECT id FROM usuarios WHERE email = ?',
+        [email]
+    );
+
+    if (existe.length) {
+        return res.status(409).json({ error: 'Email ya usado' });
+    }
+
+    const [result] = await pool.query(
+        'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
+        [nombre, email, password, 'user']
+    );
+
+    res.cookie('usuarioId', result.insertId);
+
+    res.json({
+        usuario: {
+            id: result.insertId,
+            nombre,
+            email,
+            rol: 'user'
+        }
+    });
+});
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    const [users] = await pool.query(
+        'SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND password = ?',
+        [email, password]
+    );
+
+    if (!users.length) {
+        return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+
+    res.cookie('usuarioId', users[0].id);
+
+    res.json({ usuario: users[0] });
 });
 
 app.post('/logout', (req, res) => {
     res.clearCookie('usuarioId');
-    res.send("Sesión cerrada");
+    res.json({ ok: true });
 });
 
-// ===== USUARIOS =====
-app.get('/usuarios', (req, res) => {
-    const sql = 'SELECT * FROM usuarios';
-
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error al obtener usuarios: ' + err.message);
-        }
-
-        res.json(results);
-    });
+app.get('/me', requiereLogin, (req, res) => {
+    res.json({ usuario: req.usuario });
 });
 
-app.post('/usuarios', (req, res) => {
-    const { nombre, email, password } = req.body;
+// ============================================================
+// PUBLICACIONES
+// ============================================================
 
-    const sql = 'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)';
+app.get('/publicaciones', requiereLogin, async (req, res) => {
+    const [data] = await pool.query(`
+        SELECT p.*, u.nombre AS username
+        FROM publicaciones p
+        JOIN usuarios u ON p.usuario_id = u.id
+        ORDER BY p.fecha DESC
+    `);
 
-    db.query(sql, [nombre, email, password, 'usuario'], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error al crear usuario: ' + err.message);
-        }
-
-        res.send('Usuario creado');
-    });
+    res.json(data);
 });
 
-// ===== PUBLICACIONES =====
-app.get('/publicaciones', (req, res) => {
-    const sql = `
-        SELECT publicaciones.id, publicaciones.contenido, publicaciones.fecha_publicacion, usuarios.nombre
-        FROM publicaciones
-        JOIN usuarios ON publicaciones.usuario_id = usuarios.id
-        ORDER BY publicaciones.id DESC
-    `;
+app.post('/publicaciones', requiereLogin, async (req, res) => {
+    const { contenido, tipo } = req.body;
 
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error al obtener publicaciones: ' + err.message);
-        }
+    const [r] = await pool.query(
+        'INSERT INTO publicaciones (usuario_id, contenido, tipo) VALUES (?, ?, ?)',
+        [req.usuario.id, contenido, tipo || 'general']
+    );
 
-        res.json(results);
-    });
+    res.json({ id: r.insertId });
 });
 
-app.post('/publicaciones', (req, res) => {
-    const { contenido, usuario_id } = req.body;
+// LIKE
 
-    const sql = `
-        INSERT INTO publicaciones (contenido, usuario_id)
-        VALUES (?, ?)
-    `;
+app.post('/publicaciones/:id/like', requiereLogin, async (req, res) => {
+    const id = req.params.id;
 
-    db.query(sql, [contenido, usuario_id], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error al crear publicación: ' + err.message);
-        }
+    const [existe] = await pool.query(
+        'SELECT * FROM likes WHERE usuario_id=? AND publicacion_id=?',
+        [req.usuario.id, id]
+    );
 
-        res.json({
-            mensaje: 'Publicación creada',
-            id: result.insertId
-        });
-    });
-});
-
-app.delete('/publicaciones/:id', (req, res) => {
-    const publicacionId = req.params.id;
-
-    const sql = 'DELETE FROM publicaciones WHERE id = ?';
-
-    db.query(sql, [publicacionId], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error al borrar publicación: ' + err.message);
-        }
-
-        if (result.affectedRows === 0) {
-            return res.status(404).send('Publicación no encontrada');
-        }
-
-        res.send('Publicación eliminada');
-    });
-});
-
-app.get('/usuarios/:id/publicaciones', (req, res) => {
-    const usuarioId = req.params.id;
-
-    const sql = `
-        SELECT * FROM publicaciones
-        WHERE usuario_id = ?
-    `;
-
-    db.query(sql, [usuarioId], (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error al obtener publicaciones del usuario: ' + err.message);
-        }
-
-        res.json(results);
-    });
-});
-
-// ===== MENSAJES =====
-app.get('/mensajes', (req, res) => {
-    res.json(mensajes);
-});
-
-app.post('/mensajes', (req, res) => {
-    const { de, para, contenido } = req.body;
-    const id = mensajes.length + 1;
-    mensajes.push({ id, de, para, contenido });
-    res.send("Mensaje enviado");
-});
-
-// ===== CONCIERTOS =====
-app.get('/conciertos', (req, res) => {
-    res.json(conciertos);
-});
-
-app.post('/conciertos', requireRole('admin'), (req, res) => {
-    const { nombre, fecha } = req.body;
-    const id = conciertos.length + 1;
-    conciertos.push({ id, nombre, fecha });
-    res.send("Concierto creado (solo admin)");
-});
-
-app.delete('/conciertos/:id', requireRole('admin'), (req, res) => {
-    const index = conciertos.findIndex(c => c.id == req.params.id);
-
-    if (index === -1) return res.send("Concierto no encontrado");
-
-    conciertos.splice(index, 1);
-    res.send("Concierto eliminado (solo admin)");
-});
-
-// ===== CONCIERTOS REALES (Movistar Arena / fallback) =====
-app.get('/conciertos-reales', async (req, res) => {
-    try {
-        const url = 'https://www.movistararena.es/calendario?categoria=Conciertos';
-        const respuesta = await axios.get(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0'
-            }
-        });
-
-        const html = respuesta.data;
-        const $ = cheerio.load(html);
-
-        const conciertos = [];
-
-        $('a').each((i, elem) => {
-            const enlace = $(elem).attr('href');
-            const texto = $(elem).text().replace(/\s+/g, ' ').trim();
-
-            if (
-                enlace &&
-                enlace.includes('/informacion') &&
-                texto.length > 3 &&
-                texto.length < 120 &&
-                !conciertos.some(c => c.titulo === texto)
-            ) {
-                conciertos.push({
-                    titulo: texto,
-                    lugar: 'Movistar Arena Madrid',
-                    fecha: 'Consultar web oficial',
-                    enlace: enlace.startsWith('http')
-                        ? enlace
-                        : 'https://www.movistararena.es' + enlace
-                });
-            }
-        });
-
-        if (conciertos.length === 0) {
-            return res.json([
-                {
-                    titulo: '5SOS',
-                    lugar: 'Movistar Arena Madrid',
-                    fecha: 'Próximamente',
-                    enlace: 'https://www.movistararena.es/programacion/'
-                },
-                {
-                    titulo: 'Walls - Madrid',
-                    lugar: 'Movistar Arena Madrid',
-                    fecha: 'Próximamente',
-                    enlace: 'https://www.movistararena.es/programacion/'
-                },
-                {
-                    titulo: 'Bring Me The Horizon',
-                    lugar: 'Movistar Arena Madrid',
-                    fecha: 'Próximamente',
-                    enlace: 'https://www.movistararena.es/programacion/'
-                }
-            ]);
-        }
-
-        res.json(conciertos.slice(0, 10));
-
-    } catch (error) {
-        console.log('Error al obtener conciertos reales:', error.message);
-
-        res.json([
-            {
-                titulo: '5SOS',
-                lugar: 'Movistar Arena Madrid',
-                fecha: 'Próximamente',
-                enlace: 'https://www.movistararena.es/programacion/'
-            },
-            {
-                titulo: 'Walls - Madrid',
-                lugar: 'Movistar Arena Madrid',
-                fecha: 'Próximamente',
-                enlace: 'https://www.movistararena.es/programacion/'
-            },
-            {
-                titulo: 'Bring Me The Horizon',
-                lugar: 'Movistar Arena Madrid',
-                fecha: 'Próximamente',
-                enlace: 'https://www.movistararena.es/programacion/'
-            }
-        ]);
+    if (existe.length) {
+        await pool.query('DELETE FROM likes WHERE usuario_id=? AND publicacion_id=?', [req.usuario.id, id]);
+        await pool.query('UPDATE publicaciones SET likes = likes - 1 WHERE id=?', [id]);
+        return res.json({ liked: false });
     }
+
+    await pool.query('INSERT INTO likes VALUES (?,?)', [req.usuario.id, id]);
+    await pool.query('UPDATE publicaciones SET likes = likes + 1 WHERE id=?', [id]);
+
+    res.json({ liked: true });
 });
 
-// ===== INICIAR SERVIDOR =====
-app.listen(PORT, () => {
-    console.log(`Servidor SoundLink corriendo en http://localhost:${PORT}`);
+// ============================================================
+// MENSAJES
+// ============================================================
+
+app.get('/mensajes', requiereLogin, async (req, res) => {
+    const [data] = await pool.query(`
+        SELECT * FROM mensajes
+        WHERE emisor_id = ? OR receptor_id = ?
+        ORDER BY fecha ASC
+    `, [req.usuario.id, req.usuario.id]);
+
+    res.json(data);
+});
+
+app.post('/mensajes', requiereLogin, async (req, res) => {
+    const { receptor_id, mensaje } = req.body;
+
+    await pool.query(
+        'INSERT INTO mensajes (emisor_id, receptor_id, mensaje) VALUES (?, ?, ?)',
+        [req.usuario.id, receptor_id, mensaje]
+    );
+
+    res.json({ ok: true });
+});
+
+// ============================================================
+// CONCIERTOS
+// ============================================================
+
+app.get('/conciertos', requiereLogin, async (req, res) => {
+    const [data] = await pool.query(`
+        SELECT c.*, COUNT(a.usuario_id) as attendees
+        FROM conciertos c
+        LEFT JOIN asistencias a ON c.id = a.concierto_id
+        GROUP BY c.id
+    `);
+
+    res.json(data);
+});
+
+app.post('/conciertos', requiereAdmin, async (req, res) => {
+    const { nombre, fecha, ubicacion } = req.body;
+
+    await pool.query(
+        'INSERT INTO conciertos (nombre, fecha, ubicacion) VALUES (?, ?, ?)',
+        [nombre, fecha, ubicacion]
+    );
+
+    res.json({ ok: true });
+});
+
+// ============================================================
+// INICIAR SERVIDOR
+// ============================================================
+
+app.listen(PORT, async () => {
+    await comprobarConexion();
+
+    console.log(`🚀 http://localhost:${PORT}`);
 });

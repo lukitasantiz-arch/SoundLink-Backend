@@ -1,956 +1,2461 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundLink</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundLink – Application</title>
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #BEEAFA;
-            color: #2d3b63;
-        }
+  <!-- FUENTES -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 
-        .pantalla {
-            display: none;
-            min-height: 100vh;
-        }
+  <style>
+    /* =========================================================
+       SOUNDLINK - FRONTEND TFG
+       Luka Sánchez Tello - 2º DAM
+       Archivo organizado en un solo HTML para facilitar entrega y pruebas.
+       ========================================================= */
 
-        .activa {
-            display: block;
-        }
+    /* =========================
+       1. VARIABLES Y RESET
+       ========================= */
+    :root {
+      --cyan: #6BFAF3;
+      --blue: #70AAFA;
+      --sky: #6BD4FA;
+      --mint: #6BFAC3;
+      --purple: #8995FA;
+      --mist: #BEEAFA;
+      --dark: #0d0f1a;
+      --card: #131626;
+      --border: #1e2440;
+      --text: #e8eaf6;
+      --sub: #8892b0;
+      --danger: #ff6b80;
+      --grad: linear-gradient(135deg, #6BFAF3 0%, #70AAFA 50%, #0033cc 100%);
+    }
 
-        .contenedor-login {
-            max-width: 420px;
-            margin: 40px auto;
-            background-color: #dff4ff;
-            border-radius: 25px;
-            padding: 30px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-        }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .logo-login {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-        .logo-circulo {
-            width: 110px;
-            height: 110px;
-            margin: 0 auto 20px auto;
-            border-radius: 50%;
-            background-color: #70AAFA;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: white;
-        }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      opacity: .4;
+    }
 
-        .logo-login h1 {
-            margin: 0;
-            color: #70AAFA;
-            font-size: 52px;
-        }
+    .hidden { display: none !important; }
+    .screen { display: none; min-height: 100vh; }
+    .screen.active { display: flex; }
 
-        .logo-login p {
-            margin-top: 10px;
-            font-size: 18px;
-        }
+    /* =========================
+       2. COMPONENTES GENERALES
+       ========================= */
+    .btn {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      letter-spacing: .04em;
+      border: none;
+      border-radius: 12px;
+      padding: .65rem 1.4rem;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+    }
 
-        .grupo-formulario {
-            margin-bottom: 20px;
-        }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); opacity: .85; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
-        .grupo-formulario label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 16px;
-            font-weight: bold;
-        }
+    .btn-primary {
+      background: var(--grad);
+      color: #0d0f1a;
+      box-shadow: 0 0 18px #70AAFA55;
+    }
 
-        .grupo-formulario input,
-        textarea,
-        input[type="text"] {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #c9e7f5;
-            border-radius: 12px;
-            font-size: 15px;
-            margin-bottom: 12px;
-        }
+    .btn-ghost {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--sub);
+    }
 
-        .grupo-formulario input {
-            background-color: white;
-            border: none;
-            padding: 16px;
-            font-size: 16px;
-            border-radius: 15px;
-        }
+    .btn-ghost:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
 
-        .btn-principal {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 15px;
-            background-color: #70AAFA;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
+    .btn-danger {
+      background: #ff4e6a22;
+      border: 1px solid #ff4e6a55;
+      color: var(--danger);
+    }
 
-        .btn-principal:hover {
-            opacity: 0.9;
-        }
+    .inp,
+    textarea {
+      width: 100%;
+      background: #0d0f1a;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      padding: .75rem 1rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
 
-        .btn-secundario {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background-color: #6BFAC3;
-            color: #1f2a44;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
+    .inp:focus,
+    textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 10px #70AAFA33;
+    }
 
-        .texto-login {
-            text-align: center;
-            margin-top: 20px;
-            color: #70AAFA;
-            font-weight: bold;
-        }
+    .inp::placeholder,
+    textarea::placeholder { color: var(--sub); }
 
-        .app {
-            max-width: 500px;
-            margin: 20px auto;
-            background-color: #f5fcff;
-            border-radius: 25px;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(0,0,0,0.15);
-        }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.25rem;
+    }
 
-        .cabecera {
-            background-color: #70AAFA;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+    .avatar {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
 
-        .cabecera h1 {
-            margin: 0;
-            font-size: 36px;
-        }
+    .av-sm { width: 36px; height: 36px; font-size: .85rem; }
+    .av-md { width: 48px; height: 48px; font-size: 1.1rem; }
+    .av-lg { width: 80px; height: 80px; font-size: 2rem; }
 
-        .cabecera p {
-            margin-top: 8px;
-            margin-bottom: 0;
-            font-size: 16px;
-        }
+    .badge {
+      background: var(--purple);
+      color: #fff;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: .65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
 
-        .contenido {
-            padding: 18px;
-            padding-bottom: 90px;
-        }
+    .err-msg {
+      background: #ff4e6a15;
+      border: 1px solid #ff4e6a44;
+      color: var(--danger);
+      border-radius: 10px;
+      padding: .6rem .9rem;
+      font-size: .82rem;
+    }
 
-        .tarjeta {
-            background-color: white;
-            border: 1px solid #d6eef9;
-            border-radius: 18px;
-            padding: 16px;
-            margin-bottom: 18px;
-        }
+    /* =========================
+       3. COOKIES
+       ========================= */
+    #cookie-banner {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      background: #181b2e;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      box-shadow: 0 8px 40px #00000088;
+      max-width: 640px;
+      width: calc(100% - 2rem);
+      backdrop-filter: blur(8px);
+      animation: slideUp .4s ease;
+    }
 
-        .tarjeta h2 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #3b4b73;
-        }
+    #cookie-banner p {
+      flex: 1;
+      font-size: .82rem;
+      color: var(--sub);
+      line-height: 1.55;
+    }
 
-        .mensaje-info {
-            text-align: center;
-            color: #3b4b73;
-            margin-top: 8px;
-            min-height: 20px;
-        }
+    #cookie-banner strong { color: var(--text); }
+    .cookie-btns { display: flex; gap: .5rem; flex-shrink: 0; }
+    .cookie-btns .btn { padding: .5rem 1rem; font-size: .8rem; }
 
-        .post,
-        .mensaje-chat,
-        .evento {
-            background-color: #ffffff;
-            border: 1px solid #d6eef9;
-            border-radius: 15px;
-            padding: 14px;
-            margin-bottom: 14px;
-        }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
 
-        .post-usuario {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 4px;
-        }
+    /* =========================
+       4. LOGIN / REGISTRO
+       ========================= */
+    #screen-auth {
+      align-items: stretch;
+      justify-content: center;
+      flex-direction: row;
+      position: relative;
+      padding: 0;
+      overflow: hidden;
+    }
 
-        .post-tiempo,
-        .mensaje-tiempo {
-            color: #777;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
+    .auth-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem 3.5rem;
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(145deg, #0d0f1a 0%, #0f1530 60%, #0d1225 100%);
+    }
 
-        .post-texto {
-            font-size: 16px;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
+    .auth-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .22;
+      pointer-events: none;
+    }
 
-        .acciones-post,
-        .mensaje-acciones,
-        .cookies-botones {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+    .blob1 { width: 500px; height: 500px; background: var(--cyan); top: -150px; left: -150px; }
+    .blob2 { width: 380px; height: 380px; background: var(--purple); bottom: -100px; right: -60px; }
+    .blob3 { width: 280px; height: 280px; background: var(--blue); top: 40%; left: 30%; }
 
-        .acciones-post button,
-        .mensaje-acciones button,
-        .cookies-botones button {
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+    .auth-left-logo,
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
 
-        .acciones-post button,
-        .mensaje-acciones button {
-            background-color: #BEEAFA;
-            color: #2d3b63;
-        }
+    .auth-left-logo {
+      margin-bottom: 3rem;
+      position: relative;
+      z-index: 2;
+    }
 
-        .btn-like {
-            color: #d1002c !important;
-            background-color: #ffe6ec !important;
-        }
+    .logo-img { object-fit: contain; }
+    .auth-left-logo .logo-img { width: 48px; height: 48px; }
+    .sidebar-logo .logo-img { width: 36px; height: 36px; }
 
-        .btn-borrar {
-            background-color: #ffdddd !important;
-            color: #a30000 !important;
-        }
+    .logo-wordmark,
+    .sidebar-logo span {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: .08em;
+    }
 
-        .comentarios {
-            margin-top: 12px;
-            padding-top: 10px;
-            border-top: 1px solid #e5f3fa;
-            display: none;
-        }
+    .auth-headline {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 1.5rem;
+    }
 
-        .comentarios p {
-            margin: 6px 0;
-            font-size: 14px;
-        }
+    .auth-headline h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      line-height: 1.05;
+    }
 
-        .mensaje-chat strong {
-            display: block;
-            margin-bottom: 5px;
-        }
+    .hl {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-        .mensaje-chat p {
-            margin: 0 0 10px 0;
-        }
+    .auth-tagline {
+      position: relative;
+      z-index: 2;
+      font-size: .95rem;
+      color: var(--sub);
+      line-height: 1.65;
+      max-width: 420px;
+      margin-bottom: 2.5rem;
+    }
 
-        .respuesta {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #eef8fd;
-            border-radius: 10px;
-            font-size: 14px;
-        }
+    .auth-project-badge {
+      position: relative;
+      z-index: 2;
+      display: inline-block;
+      background: #131626cc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      max-width: 440px;
+      backdrop-filter: blur(8px);
+    }
 
-        .evento h3 {
-            margin-top: 0;
-            margin-bottom: 8px;
-            color: #3b4b73;
-        }
+    .badge-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .92rem;
+      margin-bottom: .5rem;
+    }
 
-        .evento p {
-            margin: 6px 0;
-        }
+    .badge-desc {
+      font-size: .82rem;
+      color: var(--sub);
+      line-height: 1.6;
+    }
 
-        .evento a {
-            color: #70AAFA;
-            font-weight: bold;
-            text-decoration: none;
-        }
+    .auth-right {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
 
-        .evento a:hover {
-            text-decoration: underline;
-        }
+    .auth-tabs {
+      display: flex;
+      gap: .4rem;
+      margin-bottom: 2rem;
+      background: #0d0f1a;
+      border-radius: 14px;
+      padding: .3rem;
+    }
 
-        .barra-navegacion {
-            position: sticky;
-            bottom: 0;
-            display: flex;
-            justify-content: space-around;
-            background-color: #eef8fd;
-            border-top: 1px solid #d6eef9;
-            padding: 12px 8px;
-        }
+    .auth-tab {
+      flex: 1;
+      padding: .65rem;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: all .25s;
+      background: transparent;
+      color: var(--sub);
+    }
 
-        .btn-nav {
-            background: none;
-            border: none;
-            font-size: 14px;
-            color: #3b4b73;
-            cursor: pointer;
-            font-weight: bold;
-        }
+    .auth-tab.active {
+      background: linear-gradient(135deg, #6BFAF3, #70AAFA);
+      color: #0d0f1a;
+      box-shadow: 0 2px 12px #6BFAF355;
+    }
 
-        .btn-nav.activo {
-            color: #70AAFA;
-        }
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
 
-        .oculto {
-            display: none;
-        }
+    .auth-form label,
+    .field label {
+      font-size: .82rem;
+      color: var(--sub);
+      margin-bottom: .3rem;
+      display: block;
+      font-weight: 500;
+    }
 
-        .cookies-banner {
-            position: fixed;
-            bottom: 15px;
-            left: 15px;
-            right: 15px;
-            max-width: 500px;
-            margin: 0 auto;
-            background-color: white;
-            border: 1px solid #d6eef9;
-            border-radius: 18px;
-            padding: 16px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.12);
-            z-index: 1000;
-        }
+    /* =========================
+       5. LAYOUT PRINCIPAL
+       ========================= */
+    #screen-app {
+      flex-direction: row;
+      align-items: stretch;
+    }
 
-        .cookies-banner p {
-            margin-top: 0;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 10;
+    }
 
-        .btn-aceptar {
-            flex: 1;
-            background-color: #70AAFA;
-            color: white;
-        }
+    .sidebar-logo {
+      margin-bottom: 2rem;
+      padding: 0 .5rem;
+    }
 
-        .btn-rechazar {
-            flex: 1;
-            background-color: #e9f6fd;
-            color: #2d3b63;
-        }
+    .sidebar-logo span { font-size: 1.15rem; }
 
-        .estado-cookies {
-            background-color: #eef8fd;
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 12px;
-        }
-    </style>
+    .nav-section { margin-bottom: 1.5rem; }
+
+    .nav-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: var(--sub);
+      padding: 0 .75rem;
+      margin-bottom: .4rem;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .65rem .75rem;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--sub);
+      font-size: .9rem;
+      transition: all .2s;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover { background: #1e2440; color: var(--text); }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, #6BFAF318, #70AAFA18);
+      color: var(--cyan);
+      border: 1px solid #6BFAF322;
+    }
+
+    .nav-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+    .nav-badge { margin-left: auto; }
+
+    .sidebar-user {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .75rem;
+      border-radius: 14px;
+      background: #0d0f1a;
+      border: 1px solid var(--border);
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-weight: 600; font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: .72rem; color: var(--sub); }
+    .logout-btn { background: transparent; border: 0; color: var(--sub); cursor: pointer; font-size: .95rem; }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .top-bar {
+      height: 60px;
+      min-height: 60px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 9;
+    }
+
+    .top-bar h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .search-wrap { position: relative; }
+    .search-wrap input { padding-left: 2.2rem; width: 230px; font-size: .85rem; }
+    .search-icon { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); color: var(--sub); font-size: .9rem; }
+
+    .page {
+      display: none;
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .page.active { display: flex; }
+
+    /* =========================
+       6. FEED Y PUBLICACIONES
+       ========================= */
+    .feed-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    .post-composer,
+    .post-list,
+    .widget { display: flex; flex-direction: column; gap: .85rem; }
+    .composer-top { display: flex; gap: .75rem; align-items: flex-start; }
+    .composer-textarea { flex: 1; resize: none; min-height: 90px; }
+    .composer-actions { display: flex; justify-content: space-between; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    .composer-type { display: flex; gap: .4rem; flex-wrap: wrap; }
+
+    .type-pill {
+      padding: .3rem .75rem;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--sub);
+      transition: all .2s;
+    }
+
+    .type-pill.selected {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: #6BFAF318;
+    }
+
+    .post-card { display: flex; flex-direction: column; gap: .85rem; }
+    .post-header { display: flex; align-items: center; gap: .75rem; }
+    .post-meta { flex: 1; }
+    .username { font-weight: 600; font-size: .9rem; }
+    .timestamp { font-size: .75rem; color: var(--sub); }
+
+    .post-type-tag {
+      font-size: .7rem;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+
+    .tag-song { background: #6BFAF322; color: var(--cyan); border: 1px solid #6BFAF344; }
+    .tag-playlist { background: #8995FA22; color: var(--purple); border: 1px solid #8995FA44; }
+    .tag-event { background: #70AAFA22; color: var(--blue); border: 1px solid #70AAFA44; }
+    .tag-general { background: #6BFAC322; color: var(--mint); border: 1px solid #6BFAC344; }
+
+    .post-content { font-size: .92rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
+
+    .post-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .35rem .75rem;
+      border-radius: 20px;
+      border: none;
+      background: transparent;
+      color: var(--sub);
+      font-size: .82rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .action-btn:hover { background: #1e2440; color: var(--text); }
+    .action-btn.liked { color: var(--danger); }
+
+    .comments-section {
+      border-top: 1px solid var(--border);
+      padding-top: .85rem;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+    }
+
+    .comment-item { display: flex; gap: .6rem; align-items: flex-start; font-size: .84rem; }
+    .comment-author { font-weight: 700; color: var(--cyan); flex-shrink: 0; }
+    .comment-text { flex: 1; color: var(--text); line-height: 1.45; }
+    .comment-del { color: var(--sub); font-size: .75rem; cursor: pointer; flex-shrink: 0; }
+    .comment-del:hover { color: var(--danger); }
+
+    .comment-input-row { display: flex; gap: .5rem; }
+    .comment-input-row input { flex: 1; font-size: .83rem; padding: .45rem .75rem; }
+
+    .edit-textarea { min-height: 75px; resize: none; border-color: var(--blue); }
+    .edit-actions { display: flex; gap: .5rem; justify-content: flex-end; }
+
+    .widget-title { font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700; }
+    .trend-item, .suggest-item { display: flex; justify-content: space-between; align-items: center; gap: .75rem; }
+    .trend-name, .suggest-info .name { font-size: .88rem; font-weight: 500; }
+    .trend-count, .suggest-info .genre { font-size: .75rem; color: var(--sub); }
+
+    /* =========================
+       7. DESCUBRIR
+       ========================= */
+    .discover-filters { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+    .discover-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+
+    .discover-card {
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+    }
+
+    .discover-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px #70AAFA22; }
+
+    .discover-banner {
+      width: 100%;
+      height: 90px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+    }
+
+    .discover-artist { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; }
+    .discover-genre { font-size: .75rem; color: var(--purple); font-weight: 600; }
+    .discover-desc { font-size: .8rem; color: var(--sub); line-height: 1.45; }
+    .discover-follow { margin-top: auto; }
+
+    /* =========================
+       8. CONCIERTOS
+       ========================= */
+    .concerts-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+
+    .concerts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .concert-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #131626, #1e2440);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.25rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .concert-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px #70AAFA22; }
+
+    .concert-date {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .concert-month { font-size: .8rem; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+    .concert-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin: .75rem 0 .25rem; }
+    .concert-loc { font-size: .82rem; color: var(--sub); display: flex; align-items: center; gap: .3rem; }
+
+    .concert-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .5rem;
+      margin-top: 1rem;
+      padding-top: .75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .concert-attendees { font-size: .78rem; color: var(--sub); }
+
+    /* =========================
+       9. MENSAJES
+       ========================= */
+    .messages-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.25rem;
+      height: calc(100vh - 120px);
+    }
+
+    .conv-list { display: flex; flex-direction: column; gap: .5rem; overflow-y: auto; }
+
+    .conv-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .75rem;
+      border-radius: 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all .2s;
+    }
+
+    .conv-item:hover,
+    .conv-item.active { background: #1e2440; border-color: var(--border); }
+    .conv-info { flex: 1; min-width: 0; }
+    .conv-name { font-size: .9rem; font-weight: 600; }
+    .conv-preview { font-size: .78rem; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-time { font-size: .72rem; color: var(--sub); }
+
+    .chat-window {
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .chat-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .75rem; }
+    .chat-name { font-weight: 600; font-size: .95rem; }
+    .chat-status { font-size: .75rem; color: var(--mint); }
+
+    .chat-messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: .85rem; }
+    .msg { display: flex; flex-direction: column; max-width: 70%; }
+    .msg.sent { align-self: flex-end; align-items: flex-end; }
+    .msg.recv { align-self: flex-start; align-items: flex-start; }
+    .msg-bubble { padding: .6rem 1rem; border-radius: 16px; font-size: .9rem; line-height: 1.5; }
+    .msg.sent .msg-bubble { background: linear-gradient(135deg, #6BFAF3, #70AAFA); color: #0d0f1a; border-radius: 16px 16px 4px 16px; }
+    .msg.recv .msg-bubble { background: #1e2440; color: var(--text); border-radius: 16px 16px 16px 4px; }
+    .msg-time { font-size: .7rem; color: var(--sub); margin-top: .2rem; }
+
+    .chat-input-wrap { padding: 1rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: .75rem; }
+    .chat-input-wrap .inp { flex: 1; }
+
+    /* =========================
+       10. PERFIL
+       ========================= */
+    .profile-hero {
+      border-radius: 18px;
+      background: linear-gradient(135deg, #131626, #1e2440);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-top { display: flex; align-items: flex-end; gap: 1.25rem; }
+    .profile-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.6rem; }
+    .profile-handle, .profile-bio { color: var(--sub); font-size: .9rem; }
+    .profile-bio { margin-top: .5rem; font-size: .88rem; }
+
+    .profile-stats { display: flex; gap: 2rem; margin-top: 1.5rem; }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: .75rem; color: var(--sub); }
+
+    .cookie-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .3rem .8rem;
+      border-radius: 20px;
+      font-size: .78rem;
+      font-weight: 600;
+      margin-top: .75rem;
+    }
+
+    .cs-accepted { background: #6BFAC322; color: var(--mint); border: 1px solid #6BFAC344; }
+    .cs-rejected { background: #ff4e6a15; color: var(--danger); border: 1px solid #ff4e6a44; }
+    .cs-unknown { background: #8995FA22; color: var(--purple); border: 1px solid #8995FA44; }
+
+    .profile-tabs { display: flex; gap: .5rem; }
+    .ptab { padding: .5rem 1.1rem; border-radius: 10px; border: 1.5px solid var(--border); background: transparent; color: var(--sub); cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 600; font-size: .82rem; }
+    .ptab.active { border-color: var(--blue); color: var(--blue); background: #70AAFA18; }
+
+    /* =========================
+       11. ADMIN
+       ========================= */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .stat-card { padding: 1.25rem; text-align: left; }
+    .s-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; }
+    .s-label { font-size: .8rem; color: var(--sub); margin-top: .2rem; }
+    .s-trend { font-size: .75rem; color: var(--mint); margin-top: .3rem; }
+
+    .users-table { width: 100%; border-collapse: collapse; }
+    .users-table th { text-align: left; padding: .6rem 1rem; font-size: .75rem; color: var(--sub); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .users-table td { padding: .75rem 1rem; font-size: .88rem; border-bottom: 1px solid #1e244055; }
+    .users-table tr:hover td { background: #1e244033; }
+    .role-tag { display: inline-block; padding: .2rem .6rem; border-radius: 20px; font-size: .72rem; font-weight: 700; }
+    .role-admin { background: #8995FA22; color: var(--purple); border: 1px solid #8995FA44; }
+    .role-user { background: #6BFAF322; color: var(--cyan); border: 1px solid #6BFAF344; }
+
+    /* =========================
+       12. MODAL
+       ========================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: #00000080;
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px #000000aa;
+    }
+
+    .modal h3 { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 1.25rem; }
+    .modal-form { display: flex; flex-direction: column; gap: .85rem; }
+    .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: .75rem; margin-top: .5rem; }
+
+    /* =========================
+       13. RESPONSIVE
+       ========================= */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page.active > * { animation: fadeIn .3s ease both; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 900px) {
+      .sidebar { width: 60px; min-width: 60px; padding: .75rem .5rem; }
+      .sidebar-logo span,
+      .nav-item span:not(.nav-icon),
+      .nav-label,
+      .sidebar-user .user-info,
+      .logout-btn { display: none; }
+      .nav-item { justify-content: center; padding: .65rem; }
+      .feed-grid { grid-template-columns: 1fr; }
+      .feed-grid > div:last-child { display: none; }
+      .messages-layout { grid-template-columns: 1fr; height: auto; min-height: 70vh; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 820px) {
+      #screen-auth { flex-direction: column; }
+      .auth-left { padding: 2rem 1.5rem 1.5rem; min-height: auto; flex: none; }
+      .auth-headline h2 { font-size: 2rem; }
+      .auth-project-badge { display: none; }
+      .auth-right { max-width: 100%; border-left: none; border-top: 1px solid var(--border); padding: 2rem 1.5rem; }
+      .blob3 { display: none; }
+      .search-wrap { display: none; }
+      .concert-footer, .profile-top { align-items: flex-start; flex-direction: column; }
+      .profile-stats { flex-wrap: wrap; gap: 1rem; }
+      .stats-row { grid-template-columns: 1fr; }
+      .modal-row { grid-template-columns: 1fr; }
+      #cookie-banner { flex-direction: column; align-items: stretch; }
+    }
+  </style>
 </head>
+
 <body>
+  <!-- =========================================================
+       BANNER DE COOKIES
+       ========================================================= -->
+  <div id="cookie-banner" class="hidden">
+    <p><strong>SoundLink usa cookies</strong> para mejorar tu experiencia. Puedes aceptarlas o rechazarlas.</p>
+    <div class="cookie-btns">
+      <button class="btn btn-primary" onclick="setCookieConsent('accepted')">Aceptar</button>
+      <button class="btn btn-ghost" onclick="setCookieConsent('rejected')">Rechazar</button>
+    </div>
+  </div>
 
-    <div id="pantallaLogin" class="pantalla activa">
-        <div class="contenedor-login">
-            <div class="logo-login">
-                <div class="logo-circulo">♪</div>
-                <h1>SoundLink</h1>
-                <p>Conecta con la música</p>
-            </div>
+  <!-- =========================================================
+       PANTALLA DE LOGIN Y REGISTRO
+       ========================================================= -->
+  <div id="screen-auth" class="screen active">
+    <div class="auth-left">
+      <div class="auth-blob blob1"></div>
+      <div class="auth-blob blob2"></div>
+      <div class="auth-blob blob3"></div>
 
-            <div class="grupo-formulario">
-                <label for="usuarioLogin">Usuario</label>
-                <input type="text" id="usuarioLogin" placeholder="Ingresa tu usuario">
-            </div>
+      <div class="auth-left-logo">
+        <img src="SOUNDLINK.png" alt="SoundLink" class="logo-img" onerror="this.style.display='none'" />
+        <span class="logo-wordmark">SOUNDLINK</span>
+      </div>
 
-            <div class="grupo-formulario">
-                <label for="passwordLogin">Contraseña</label>
-                <input type="text" id="passwordLogin" placeholder="Ingresa tu contraseña">
-            </div>
+      <div class="auth-headline">
+        <h2>Conecta<br><span class="hl">por la</span><br>música.</h2>
+      </div>
 
-            <button class="btn-principal" id="btnLogin">Iniciar sesión</button>
-            <div class="texto-login">Demo funcional del frontend</div>
+      <p class="auth-tagline">
+        Una red social para descubrir personas con gustos musicales parecidos,
+        compartir canciones, hablar por chat y organizar conciertos en grupo.
+      </p>
+
+      <div class="auth-project-badge">
+        <div class="badge-title">Luka Sánchez Tello</div>
+        <div class="badge-desc">
+          Fundador de SoundLink, una propuesta digital creada para conectar personas
+          a través de la música, los gustos compartidos y los planes en grupo.
         </div>
+      </div>
     </div>
 
-    <div id="pantallaApp" class="pantalla">
-        <div class="app">
-            <div class="cabecera">
-                <h1>SoundLink</h1>
-                <p id="saludoUsuario">Bienvenido</p>
-            </div>
-
-            <div class="contenido">
-                <div id="seccionFeed">
-                    <div class="tarjeta">
-                        <h2>Crear publicación</h2>
-                        <textarea id="contenidoPublicacion" rows="3" placeholder="Escribe algo sobre música, conciertos o artistas"></textarea>
-                        <button class="btn-principal" id="btnPublicar">Publicar</button>
-                        <div id="mensajePublicacion" class="mensaje-info"></div>
-                    </div>
-
-                    <div class="tarjeta">
-                        <h2>Feed musical</h2>
-                        <div id="listaPublicaciones"></div>
-                    </div>
-                </div>
-
-                <div id="seccionMensajes" class="oculto">
-                    <div class="tarjeta">
-                        <h2>Mensajes</h2>
-                        <input type="text" id="destinatarioMensaje" placeholder="Escribe el nombre del destinatario">
-                        <textarea id="textoMensaje" rows="3" placeholder="Escribe un mensaje"></textarea>
-                        <button class="btn-principal" id="btnEnviarMensaje">Enviar mensaje</button>
-                        <div id="listaMensajes"></div>
-                    </div>
-                </div>
-
-                <div id="seccionConciertos" class="oculto">
-                    <div class="tarjeta">
-                        <h2>Conciertos</h2>
-                        <div id="listaConciertosReales"></div>
-                    </div>
-                </div>
-
-                <div id="seccionPerfil" class="oculto">
-                    <div class="tarjeta">
-                        <h2>Perfil</h2>
-                        <p><strong>Usuario:</strong> <span id="nombrePerfil"></span></p>
-                        <p><strong>Descripción:</strong> Me gusta descubrir música nueva, compartir canciones y organizar planes para conciertos.</p>
-                        <p><strong>Artistas favoritos:</strong> 5SOS, Taylor Swift, Walls y BMTH</p>
-
-                        <div class="estado-cookies">
-                            <p><strong>Estado de cookies:</strong> <span id="estadoCookiesTexto">No decidido</span></p>
-                            <button class="btn-secundario" id="btnCambiarCookies">Volver a elegir cookies</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="barra-navegacion">
-                <button class="btn-nav activo" id="navInicio">Inicio</button>
-                <button class="btn-nav" id="navMensajes">Mensajes</button>
-                <button class="btn-nav" id="navConciertos">Conciertos</button>
-                <button class="btn-nav" id="navPerfil">Perfil</button>
-            </div>
+    <div class="auth-right">
+      <div class="auth-box">
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchTab('login')">Iniciar sesión</button>
+          <button class="auth-tab" onclick="switchTab('register')">Registrarse</button>
         </div>
-    </div>
 
-    <div id="cookiesBanner" class="cookies-banner">
-        <p>Esta demo utiliza cookies para guardar la sesión y la preferencia de uso. ¿Quieres aceptarlas?</p>
-        <div class="cookies-botones">
-            <button id="btnAceptarCookies" class="btn-aceptar">Aceptar</button>
-            <button id="btnRechazarCookies" class="btn-rechazar">Rechazar</button>
+        <div id="tab-login">
+          <div class="auth-form">
+            <div>
+              <label>Email o usuario</label>
+              <input class="inp" id="login-user" type="text" placeholder="luka@gmail.com" />
+            </div>
+            <div>
+              <label>Contraseña</label>
+              <input class="inp" id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+            </div>
+            <div id="login-err" class="err-msg hidden"></div>
+            <button class="btn btn-primary" style="width:100%;padding:.85rem;font-size:.95rem;border-radius:14px" onclick="doLogin()">
+              Entrar a SoundLink
+            </button>
+            <p style="font-size:.75rem;color:var(--sub);text-align:center;line-height:1.6">
+              Demo usuario: <strong style="color:var(--text)">luka@gmail.com / 1234</strong><br>
+              Demo admin: <strong style="color:var(--text)">admin@gmail.com / 1234</strong>
+            </p>
+          </div>
         </div>
+
+        <div id="tab-register" class="hidden">
+          <div class="auth-form">
+            <div>
+              <label>Nombre completo</label>
+              <input class="inp" id="reg-name" type="text" placeholder="Tu nombre" />
+            </div>
+            <div>
+              <label>Email</label>
+              <input class="inp" id="reg-email" type="email" placeholder="tu@email.com" />
+            </div>
+            <div>
+              <label>Contraseña</label>
+              <input class="inp" id="reg-pass" type="password" placeholder="••••••••" />
+            </div>
+            <div id="reg-err" class="err-msg hidden"></div>
+            <button class="btn btn-primary" style="width:100%;padding:.85rem;font-size:.95rem;border-radius:14px" onclick="doRegister()">
+              Crear cuenta
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const pantallaLogin = document.getElementById("pantallaLogin");
-        const pantallaApp = document.getElementById("pantallaApp");
+  <!-- =========================================================
+       APLICACIÓN PRINCIPAL
+       ========================================================= -->
+  <div id="screen-app" class="screen">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="SOUNDLINK.png" alt="SoundLink" class="logo-img" onerror="this.style.display='none'" />
+        <span>SoundLink</span>
+      </div>
 
-        const usuarioLogin = document.getElementById("usuarioLogin");
-        const passwordLogin = document.getElementById("passwordLogin");
-        const btnLogin = document.getElementById("btnLogin");
+      <div class="nav-section">
+        <div class="nav-label">Principal</div>
+        <button class="nav-item active" onclick="goPage('feed', this)"><span class="nav-icon">🏠</span><span>Feed</span></button>
+        <button class="nav-item" onclick="goPage('discover', this)"><span class="nav-icon">🔍</span><span>Descubrir</span></button>
+        <button class="nav-item" onclick="goPage('concerts', this)"><span class="nav-icon">🎵</span><span>Conciertos</span></button>
+      </div>
 
-        const saludoUsuario = document.getElementById("saludoUsuario");
-        const nombrePerfil = document.getElementById("nombrePerfil");
-        const estadoCookiesTexto = document.getElementById("estadoCookiesTexto");
-        const btnCambiarCookies = document.getElementById("btnCambiarCookies");
+      <div class="nav-section">
+        <div class="nav-label">Social</div>
+        <button class="nav-item" onclick="goPage('messages', this)"><span class="nav-icon">💬</span><span>Mensajes</span><span class="nav-badge"><span class="badge">4</span></span></button>
+        <button class="nav-item" onclick="goPage('profile', this)"><span class="nav-icon">👤</span><span>Mi Perfil</span></button>
+      </div>
 
-        const seccionFeed = document.getElementById("seccionFeed");
-        const seccionMensajes = document.getElementById("seccionMensajes");
-        const seccionConciertos = document.getElementById("seccionConciertos");
-        const seccionPerfil = document.getElementById("seccionPerfil");
+      <div class="nav-section" id="admin-nav" style="display:none">
+        <div class="nav-label">Administración</div>
+        <button class="nav-item" onclick="goPage('admin', this)"><span class="nav-icon">⚙️</span><span>Panel Admin</span></button>
+      </div>
 
-        const navInicio = document.getElementById("navInicio");
-        const navMensajes = document.getElementById("navMensajes");
-        const navConciertos = document.getElementById("navConciertos");
-        const navPerfil = document.getElementById("navPerfil");
+      <div class="sidebar-user">
+        <div class="avatar av-sm" id="sidebar-av"></div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">Usuario</div>
+          <div class="user-role" id="sidebar-role">Oyente</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Cerrar sesión">↩</button>
+      </div>
+    </aside>
 
-        const contenidoPublicacion = document.getElementById("contenidoPublicacion");
-        const btnPublicar = document.getElementById("btnPublicar");
-        const mensajePublicacion = document.getElementById("mensajePublicacion");
-        const listaPublicaciones = document.getElementById("listaPublicaciones");
+    <main class="main-content">
+      <div class="top-bar">
+        <h2 id="page-title">Feed</h2>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="inp" type="text" placeholder="Buscar artistas, usuarios…" id="search-inp" />
+        </div>
+        <div class="avatar av-sm" id="topbar-av"></div>
+      </div>
 
-        const destinatarioMensaje = document.getElementById("destinatarioMensaje");
-        const textoMensaje = document.getElementById("textoMensaje");
-        const btnEnviarMensaje = document.getElementById("btnEnviarMensaje");
-        const listaMensajes = document.getElementById("listaMensajes");
+      <!-- FEED -->
+      <section class="page active" id="page-feed">
+        <div class="feed-grid">
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card post-composer">
+              <div class="composer-top">
+                <div class="avatar av-md" id="composer-av"></div>
+                <textarea class="composer-textarea" id="composer-text" placeholder="¿Qué estás escuchando hoy?…"></textarea>
+              </div>
+              <div class="composer-actions">
+                <div class="composer-type">
+                  <button class="type-pill selected" onclick="selectType(this, 'song')">🎵 Canción</button>
+                  <button class="type-pill" onclick="selectType(this, 'playlist')">📋 Playlist</button>
+                  <button class="type-pill" onclick="selectType(this, 'general')">💬 General</button>
+                </div>
+                <button class="btn btn-primary" onclick="createPost()">Publicar</button>
+              </div>
+            </div>
+            <div class="post-list" id="post-list"></div>
+          </div>
 
-        const listaConciertosReales = document.getElementById("listaConciertosReales");
+          <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <div class="card widget">
+              <div class="widget-title">Trending ahora</div>
+              <div class="trend-item"><span class="trend-name">#5SOS</span><span class="trend-count">2.1k posts</span></div>
+              <div class="trend-item"><span class="trend-name">#TaylorSwift</span><span class="trend-count">1.8k posts</span></div>
+              <div class="trend-item"><span class="trend-name">#NatosYWaor</span><span class="trend-count">940 posts</span></div>
+              <div class="trend-item"><span class="trend-name">#Extremoduro</span><span class="trend-count">780 posts</span></div>
+            </div>
+            <div class="card widget">
+              <div class="widget-title">Personas similares</div>
+              <div id="suggest-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        const cookiesBanner = document.getElementById("cookiesBanner");
-        const btnAceptarCookies = document.getElementById("btnAceptarCookies");
-        const btnRechazarCookies = document.getElementById("btnRechazarCookies");
+      <!-- DESCUBRIR -->
+      <section class="page" id="page-discover">
+        <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;">Descubre nueva música</h3>
+        <div class="discover-filters" id="discover-filters"></div>
+        <div class="discover-grid" id="discover-grid"></div>
+      </section>
 
-        let usuarioActual = "";
+      <!-- CONCIERTOS -->
+      <section class="page" id="page-concerts">
+        <div class="concerts-header">
+          <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;">Próximos conciertos</h3>
+          <button class="btn btn-primary" id="btn-new-concert" onclick="openConcertModal()" style="display:none">+ Nuevo concierto</button>
+        </div>
+        <div class="concerts-grid" id="concerts-grid"></div>
+      </section>
 
-        let publicacionesUsuario = [];
+      <!-- MENSAJES -->
+      <section class="page" id="page-messages">
+        <div class="messages-layout">
+          <div class="card" style="overflow:hidden;display:flex;flex-direction:column;gap:.75rem;padding:1rem;">
+            <h4 style="font-family:'Syne',sans-serif;font-weight:700;">Conversaciones</h4>
+            <div class="conv-list" id="conv-list"></div>
+          </div>
 
-        const publicacionesFake = [
-            {
-                id: "fake1",
-                usuario: "Carlos Ruiz",
-                tiempo: "Hace 2 horas",
-                contenido: "El concierto de Walls estuvo genial. El ambiente fue buenísimo y acabé con ganas de repetir.",
-                likes: 12,
-                comentarios: ["Yo quiero ir al próximo.", "Walls en directo gana muchísimo."],
-                esMia: false
-            },
-            {
-                id: "fake2",
-                usuario: "María López",
-                tiempo: "Hace 5 horas",
-                contenido: "Hoy he estado escuchando 5SOS toda la tarde. Ojalá vuelvan pronto con una gira nueva.",
-                likes: 18,
-                comentarios: ["Literalmente yo todos los días.", "Su último disco me encanta."],
-                esMia: false
-            },
-            {
-                id: "fake3",
-                usuario: "David Martín",
-                tiempo: "Hace 1 día",
-                contenido: "Sigo esperando noticias de Taylor Swift en España porque sería un concierto increíble.",
-                likes: 31,
-                comentarios: ["Sería histórico.", "Yo iría sin pensarlo."],
-                esMia: false
-            }
+          <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+              <div class="avatar av-sm" id="chat-av"></div>
+              <div>
+                <div class="chat-name" id="chat-name">Selecciona una conversación</div>
+                <div class="chat-status" id="chat-status">–</div>
+              </div>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-wrap">
+              <input class="inp" id="chat-input" type="text" placeholder="Escribe un mensaje…" onkeydown="if(event.key==='Enter')sendMessage()" />
+              <button class="btn btn-primary" onclick="sendMessage()">→</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PERFIL -->
+      <section class="page" id="page-profile">
+        <div class="profile-hero">
+          <div class="profile-top">
+            <div class="avatar av-lg" id="profile-av"></div>
+            <div>
+              <div class="profile-name" id="profile-name">Usuario</div>
+              <div class="profile-handle" id="profile-handle">@usuario</div>
+              <div class="profile-bio">Amante de la música indie y el jazz | Madrid</div>
+              <div id="profile-cookie-status"></div>
+            </div>
+            <button class="btn btn-ghost" style="margin-left:auto">Editar perfil</button>
+          </div>
+
+          <div class="profile-stats">
+            <div class="stat"><div class="stat-num" id="stat-posts">0</div><div class="stat-label">Publicaciones</div></div>
+            <div class="stat"><div class="stat-num">142</div><div class="stat-label">Seguidores</div></div>
+            <div class="stat"><div class="stat-num" id="stat-following">89</div><div class="stat-label">Siguiendo</div></div>
+            <div class="stat"><div class="stat-num">7</div><div class="stat-label">Conciertos</div></div>
+          </div>
+        </div>
+
+      <div class="profile-tabs">
+  <button class="ptab active" onclick="setProfileTab('posts', this)">Publicaciones</button>
+  <button class="ptab" onclick="setProfileTab('playlists', this)">Playlists</button>
+  <button class="ptab" onclick="setProfileTab('events', this)">Eventos</button>
+</div>
+
+<div id="profile-posts" class="post-list"></div>
+      </section>
+
+      <!-- ADMIN -->
+      <section class="page" id="page-admin">
+        <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;">Panel de administración</h3>
+        <div class="stats-row">
+          <div class="card stat-card"><div class="s-num" id="admin-stat-users" style="color:var(--cyan)">–</div><div class="s-label">Usuarios registrados</div><div class="s-trend">↑ +12 esta semana</div></div>
+          <div class="card stat-card"><div class="s-num" id="admin-stat-posts" style="color:var(--blue)">–</div><div class="s-label">Publicaciones totales</div><div class="s-trend">↑ +340 hoy</div></div>
+          <div class="card stat-card"><div class="s-num" style="color:var(--mint)">98.7%</div><div class="s-label">Uptime del servidor</div><div class="s-trend">Todo operativo</div></div>
+          <div class="card stat-card"><div class="s-num" style="color:var(--purple)">23</div><div class="s-label">Reportes pendientes</div><div class="s-trend">↓ -5 vs ayer</div></div>
+        </div>
+        <div class="card">
+          <h4 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1rem;">Gestión de usuarios</h4>
+          <div style="overflow-x:auto"><table class="users-table" id="admin-table"></table></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================================================
+       MODAL CREAR CONCIERTO
+       ========================================================= -->
+  <div class="modal-backdrop hidden" id="concert-modal">
+    <div class="modal">
+      <h3>Nuevo concierto</h3>
+      <div class="modal-form">
+        <div class="field">
+          <label>Nombre del artista / evento</label>
+          <input class="inp" id="c-name" placeholder="Rosalía en Madrid" />
+        </div>
+        <div class="modal-row">
+          <div class="field">
+            <label>Fecha</label>
+            <input class="inp" id="c-date" type="date" />
+          </div>
+          <div class="field">
+            <label>Ubicación</label>
+            <input class="inp" id="c-loc" placeholder="WiZink Center, Madrid" />
+          </div>
+        </div>
+        <div id="modal-err" class="err-msg hidden"></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeConcertModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="createConcert()">Crear concierto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    /* =========================================================
+       1. CONFIGURACIÓN GENERAL
+       ========================================================= */
+    const API = 'http://localhost:3000';
+
+   let currentUser = null;
+let posts = [];
+let concerts = [];
+let allUsers = [];
+let messages = {};
+let currentConv = null;
+let postType = 'song';
+let activeFilter = 'todo';
+let followedArtists = {};
+let followedUsers = {};
+let followingCount = 89;
+let currentProfileTab = 'posts';
+
+function setProfileTab(tab, btn) {
+  currentProfileTab = tab;
+
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  renderProfileContent();
+}
+    const COLORS = ['#6BFAF3', '#70AAFA', '#8995FA', '#6BD4FA', '#6BFAC3'];
+    const GENRES = ['Rock', 'Pop', 'Indie', 'Jazz', 'Electrónica', 'Hip-Hop', 'Metal', 'Reggaetón'];
+
+    const DEMO_USERS = [
+      { id: 1, nombre: 'Luka Sánchez', email: 'luka@gmail.com', password: '1234', rol: 'usuario', fecha_reg: new Date().toISOString() },
+      { id: 2, nombre: 'Admin SoundLink', email: 'admin@gmail.com', password: '1234', rol: 'admin', fecha_reg: new Date().toISOString() }
+    ];
+
+const DEMO_POSTS = [
+  {
+    id: 'd1',
+    userId: -1,
+    username: '5 Seconds of Summer',
+    content: 'Nos vemos en Madrid el 30 de abril en el Palacio Vistalegre a las 21:00. Va a ser una noche especial. #5SOS #Madrid',
+    tipo: 'event',
+    likes: 512,
+    liked: false,
+    fecha: new Date(Date.now() - 7200000).toISOString(),
+    comments: [
+      { id: 'c1', author: 'Marta', text: 'Necesito ir a este concierto.' },
+      { id: 'c2', author: 'David', text: 'Palacio Vistalegre va a explotar.' }
+    ]
+  },
+  {
+    id: 'd2',
+    userId: -2,
+    username: 'Marta Chamorro',
+    content: 'Hoy estoy escuchando mucho a Taylor Swift. Hay canciones que parece que te leen la cabeza.',
+    tipo: 'song',
+    likes: 38,
+    liked: false,
+    fecha: new Date(Date.now() - 10800000).toISOString(),
+    comments: [{ id: 'c3', author: 'Luka', text: 'Totalmente.' }]
+  },
+  {
+    id: 'd3',
+    userId: -3,
+    username: 'David Morales',
+    content: 'He creado una playlist de rock español para entrenar: Extremoduro, Marea, Fito, Platero y Tú y algo de Leiva.',
+    tipo: 'playlist',
+    likes: 67,
+    liked: false,
+    fecha: new Date(Date.now() - 18000000).toISOString(),
+    comments: []
+  },
+  {
+    id: 'd4',
+    userId: -4,
+    username: 'Natos y Waor',
+    content: 'Madrid siempre responde. Nueva fecha anunciada y ganas de romper el escenario.',
+    tipo: 'event',
+    likes: 547,
+    liked: false,
+    fecha: new Date(Date.now() - 32400000).toISOString(),
+    comments: [{ id: 'c4', author: 'Noelia', text: 'Esto hay que verlo en directo.' }]
+  },
+  {
+    id: 'd5',
+    userId: -5,
+    username: 'Noelia Sánchez',
+    content: '¿Alguien recomienda artistas parecidos a Duki o C. Tangana? Quiero descubrir música nueva.',
+    tipo: 'general',
+    likes: 21,
+    liked: false,
+    fecha: new Date(Date.now() - 50400000).toISOString(),
+    comments: [{ id: 'c5', author: 'David', text: 'Prueba con KHEA y YSY A.' }]
+  },
+  {
+    id: 'd6',
+    userId: -6,
+    username: 'Laura Martín',
+    content: 'Rosalía tiene una forma brutal de mezclar estilos. Motomami sigue sonando actual.',
+    tipo: 'song',
+    likes: 74,
+    liked: false,
+    fecha: new Date(Date.now() - 72000000).toISOString(),
+    comments: []
+  },
+  {
+    id: 'd7',
+    userId: -7,
+    username: 'Carlos Ruiz',
+    content: 'Busco gente para ir a un concierto indie por Madrid. Me da igual si es Vetusta, Love of Lesbian o algo parecido.',
+    tipo: 'event',
+    likes: 18,
+    liked: false,
+    fecha: new Date(Date.now() - 93600000).toISOString(),
+    comments: [{ id: 'c6', author: 'Marta', text: 'Me apunto si es indie.' }]
+  },
+  {
+    id: 'd8',
+    userId: -8,
+    username: 'Sergio López',
+    content: 'Hoy entrenando con Bring Me The Horizon, no falla nunca para motivarme.',
+    tipo: 'song',
+    likes: 55,
+    liked: false,
+    fecha: new Date(Date.now() - 25000000).toISOString(),
+    comments: [{ id: 'c7', author: 'Luka', text: 'Totalmente, meten mucha caña.' }]
+  },
+  {
+    id: 'd9',
+    userId: -9,
+    username: 'Ana Torres',
+    content: '¿Alguien va al concierto de Rosalía en julio? Voy sola de momento.',
+    tipo: 'event',
+    likes: 19,
+    liked: false,
+    fecha: new Date(Date.now() - 30000000).toISOString(),
+    comments: [{ id: 'c8', author: 'Marta', text: 'Yo seguramente sí.' }]
+  },
+  {
+    id: 'd10',
+    userId: -10,
+    username: 'Pablo Ruiz',
+    content: 'Playlist para conducir de noche: The Weeknd, Arctic Monkeys, Lana del Rey… brutal.',
+    tipo: 'playlist',
+    likes: 72,
+    liked: false,
+    fecha: new Date(Date.now() - 40000000).toISOString(),
+    comments: []
+  },
+  {
+    id: 'd11',
+    userId: -11,
+    username: 'Lucía Gómez',
+    content: 'Me flipa descubrir música nueva aquí, ya he encontrado 3 artistas nuevos hoy.',
+    tipo: 'general',
+    likes: 34,
+    liked: false,
+    fecha: new Date(Date.now() - 50000000).toISOString(),
+    comments: []
+  }
+];
+
+const DEMO_CONCERTS = [
+  { id: 1, nombre: '5 Seconds of Summer', fecha: '2026-04-30', hora: '21:00', ubicacion: 'Palacio Vistalegre, Madrid', attendees: 8200, asistiendo: false },
+  { id: 2, nombre: 'Taylor Swift Night', fecha: '2026-05-10', hora: '20:30', ubicacion: 'WiZink Center, Madrid', attendees: 12400, asistiendo: false },
+  { id: 3, nombre: 'Natos y Waor', fecha: '2026-11-07', hora: '20:00', ubicacion: 'Movistar Arena, Madrid', attendees: 9700, asistiendo: false },
+  { id: 4, nombre: 'Tributo Extremoduro', fecha: '2026-05-18', hora: '21:30', ubicacion: 'La Riviera, Madrid', attendees: 1400, asistiendo: false },
+  { id: 5, nombre: 'Rosalía Experience', fecha: '2026-07-03', hora: '22:00', ubicacion: 'IFEMA Madrid', attendees: 15600, asistiendo: false },
+  { id: 6, nombre: 'Vetusta Morla', fecha: '2026-06-28', hora: '21:00', ubicacion: 'Noches del Botánico, Madrid', attendees: 3600, asistiendo: false },
+  { id: 7, nombre: 'Duki', fecha: '2026-09-12', hora: '21:30', ubicacion: 'WiZink Center, Madrid', attendees: 11200, asistiendo: false },
+  { id: 8, nombre: 'C. Tangana', fecha: '2026-10-04', hora: '21:00', ubicacion: 'Movistar Arena, Madrid', attendees: 9800, asistiendo: false },
+  { id: 9, nombre: 'Bad Bunny', fecha: '2026-08-15', hora: '22:00', ubicacion: 'Estadio Metropolitano, Madrid', attendees: 45000, asistiendo: false },
+  { id: 10, nombre: 'Imagine Dragons', fecha: '2026-06-10', hora: '21:00', ubicacion: 'WiZink Center, Madrid', attendees: 15000, asistiendo: false },
+  { id: 11, nombre: 'Arctic Monkeys', fecha: '2026-07-22', hora: '21:30', ubicacion: 'Mad Cool Festival, Madrid', attendees: 32000, asistiendo: false },
+  { id: 12, nombre: 'Aitana', fecha: '2026-05-25', hora: '20:30', ubicacion: 'Palau Sant Jordi, Barcelona', attendees: 12000, asistiendo: false },
+  { id: 13, nombre: 'Quevedo', fecha: '2026-09-01', hora: '22:00', ubicacion: 'Gran Canaria Arena', attendees: 9000, asistiendo: false }
+];
+
+    const DEMO_CONVS = [
+  {
+    id: 'dm1', nombre: 'Marta',
+    messages: [
+      { from: 'them', texto: 'Hola, ¿has escuchado lo nuevo de 5SOS?', fecha: new Date(Date.now() - 7200000).toISOString() },
+      { from: 'me', texto: 'Sí, está bastante bien.', fecha: new Date(Date.now() - 7100000).toISOString() },
+      { from: 'them', texto: 'Pensé que te iba a gustar.', fecha: new Date(Date.now() - 7000000).toISOString() },
+      { from: 'me', texto: 'Además vienen a Madrid el 30 de abril.', fecha: new Date(Date.now() - 6900000).toISOString() }
+    ]
+  },
+  {
+    id: 'dm2', nombre: 'David',
+    messages: [
+      { from: 'them', texto: '¿Vas al concierto de Taylor Swift Night?', fecha: new Date(Date.now() - 86400000).toISOString() },
+      { from: 'me', texto: 'Puede ser, me mola el plan.', fecha: new Date(Date.now() - 86300000).toISOString() },
+      { from: 'them', texto: 'Si vas avísame y miramos entradas.', fecha: new Date(Date.now() - 86200000).toISOString() }
+    ]
+  },
+  {
+    id: 'dm3', nombre: 'Noelia',
+    messages: [
+      { from: 'me', texto: '¿Conoces a Natos y Waor?', fecha: new Date(Date.now() - 172800000).toISOString() },
+      { from: 'them', texto: 'Claro, son buenísimos.', fecha: new Date(Date.now() - 172700000).toISOString() },
+      { from: 'them', texto: 'En directo tienen que ser una locura.', fecha: new Date(Date.now() - 172600000).toISOString() }
+    ]
+  },
+  {
+    id: 'dm4', nombre: 'Grupo Concierto 5SOS',
+    messages: [
+      { from: 'them', texto: 'Chicos, 5SOS toca el 30 de abril en Palacio Vistalegre.', fecha: new Date(Date.now() - 5400000).toISOString() },
+      { from: 'me', texto: '¿A qué hora era?', fecha: new Date(Date.now() - 5300000).toISOString() },
+      { from: 'them', texto: 'A las 21:00. Podemos quedar antes para cenar algo.', fecha: new Date(Date.now() - 5200000).toISOString() },
+      { from: 'me', texto: 'Perfecto, yo me apunto.', fecha: new Date(Date.now() - 5100000).toISOString() }
+    ]
+  },
+  {
+    id: 'dm5', nombre: 'Laura',
+    messages: [
+      { from: 'them', texto: 'He visto que te gusta Rosalía. ¿Has escuchado Motomami entero?', fecha: new Date(Date.now() - 2600000).toISOString() },
+      { from: 'me', texto: 'Sí, me parece bastante original.', fecha: new Date(Date.now() - 2500000).toISOString() }
+    ]
+  }
+];
+
+ const DISCOVER_ARTISTS = [
+  { name: '5 Seconds of Summer', genre: 'Pop', filter: '5sos', emoji: '🎸', desc: 'Banda australiana de pop-rock con canciones muy melódicas y directos potentes.' },
+  { name: 'Taylor Swift', genre: 'Pop', filter: 'taylor', emoji: '🎤', desc: 'Cantautora internacional con una gran comunidad y estilos muy variados.' },
+  { name: 'Natos y Waor', genre: 'Rap', filter: 'natos', emoji: '🎙', desc: 'Dúo madrileño referente del rap español actual.' },
+  { name: 'Extremoduro', genre: 'Rock', filter: 'extremoduro', emoji: '🤘', desc: 'Grupo legendario del rock español con letras muy reconocibles.' },
+  { name: 'Rosalía', genre: 'Pop', filter: 'pop', emoji: '💃', desc: 'Artista española que mezcla pop, flamenco y sonidos urbanos.' },
+  { name: 'Vetusta Morla', genre: 'Indie', filter: 'indie', emoji: '🎵', desc: 'Banda madrileña de indie rock con letras cuidadas y sonido propio.' },
+  { name: 'Duki', genre: 'Rap', filter: 'rap', emoji: '🎧', desc: 'Referente argentino dentro del trap y la música urbana.' },
+  { name: 'C. Tangana', genre: 'Pop', filter: 'pop', emoji: '🎶', desc: 'Artista madrileño que mezcla pop, flamenco, rap y música tradicional.' },
+  { name: 'Bad Bunny', genre: 'Reggaetón', filter: 'reggaeton', emoji: '🐰', desc: 'Uno de los artistas urbanos más escuchados a nivel internacional.' },
+  { name: 'Marea', genre: 'Rock', filter: 'rock', emoji: '🔥', desc: 'Rock español con letras callejeras y mucha fuerza en directo.' },
+  { name: 'Arctic Monkeys', genre: 'Indie', filter: 'indie', emoji: '🕶️', desc: 'Banda británica con sonido indie rock y una evolución musical muy marcada.' },
+  { name: 'Imagine Dragons', genre: 'Rock', filter: 'rock', emoji: '🐉', desc: 'Grupo de rock alternativo con canciones muy energéticas.' },
+  { name: 'Aitana', genre: 'Pop', filter: 'pop', emoji: '✨', desc: 'Artista pop española con estilo moderno y canciones muy pegadizas.' },
+  { name: 'Quevedo', genre: 'Rap', filter: 'rap', emoji: '🌊', desc: 'Artista urbano español con gran presencia en la escena actual.' }
+];
+
+    /* =========================================================
+       2. FUNCIONES DE UTILIDAD
+       ========================================================= */
+    function avatarColor(name) {
+      const n = name || '?';
+      const i = (n.charCodeAt(0) + (n.charCodeAt(1) || 0)) % COLORS.length;
+      return COLORS[i];
+    }
+
+    function initials(name) {
+      return (name || '?')
+        .split(' ')
+        .filter(Boolean)
+        .map(word => word[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+    }
+
+    function setAv(el, name, dark = true) {
+      if (!el) return;
+      el.style.background = `linear-gradient(135deg, ${avatarColor(name)}, #70AAFA)`;
+      el.style.color = dark ? '#0d0f1a' : '#fff';
+      el.textContent = initials(name);
+    }
+
+    function escapeHTML(text) {
+      return String(text ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function formatFecha(fecha) {
+      if (!fecha) return '';
+      const d = new Date(fecha);
+      const now = new Date();
+      const diff = Math.floor((now - d) / 1000);
+
+      if (Number.isNaN(d.getTime())) return '';
+      if (diff < 60) return 'hace un momento';
+      if (diff < 3600) return `hace ${Math.floor(diff / 60)} min`;
+      if (diff < 86400) return `hace ${Math.floor(diff / 3600)}h`;
+      return d.toLocaleDateString('es-ES');
+    }
+
+    function typeTag(tipo) {
+      const names = {
+        song: '🎵 Canción',
+        playlist: '📋 Playlist',
+        event: '🎤 Evento',
+        general: '💬 General'
+      };
+
+      const classes = {
+        song: 'tag-song',
+        playlist: 'tag-playlist',
+        event: 'tag-event',
+        general: 'tag-general'
+      };
+
+      return `<span class="post-type-tag ${classes[tipo] || 'tag-general'}">${names[tipo] || '💬 General'}</span>`;
+    }
+
+    async function api(method, url, body) {
+      const opts = {
+        method,
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      };
+
+      if (body) opts.body = JSON.stringify(body);
+
+      const response = await fetch(API + url, opts);
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) throw data;
+      return data;
+    }
+
+    /* =========================================================
+       3. COOKIES
+       ========================================================= */
+    function getCookieConsent() {
+      return localStorage.getItem('soundlink_cookies');
+    }
+
+    function setCookieConsent(value) {
+      localStorage.setItem('soundlink_cookies', value);
+      document.getElementById('cookie-banner').classList.add('hidden');
+      updateProfileCookieStatus();
+    }
+
+    function showCookieBannerIfNeeded() {
+      if (!getCookieConsent()) {
+        setTimeout(() => {
+          document.getElementById('cookie-banner').classList.remove('hidden');
+        }, 700);
+      }
+    }
+
+    function hideCookieBanner() {
+      document.getElementById('cookie-banner').classList.add('hidden');
+    }
+
+    function updateProfileCookieStatus() {
+      const value = getCookieConsent();
+      const el = document.getElementById('profile-cookie-status');
+      if (!el) return;
+
+      if (value === 'accepted') {
+        el.innerHTML = '<span class="cookie-status-badge cs-accepted">Cookies aceptadas</span>';
+      } else if (value === 'rejected') {
+        el.innerHTML = '<span class="cookie-status-badge cs-rejected">Cookies rechazadas</span>';
+      } else {
+        el.innerHTML = '<span class="cookie-status-badge cs-unknown">Cookies sin configurar</span>';
+      }
+    }
+
+    /* =========================================================
+       4. AUTENTICACIÓN
+       ========================================================= */
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach((button, index) => {
+        const isLogin = index === 0 && tab === 'login';
+        const isRegister = index === 1 && tab === 'register';
+        button.classList.toggle('active', isLogin || isRegister);
+      });
+
+      document.getElementById('tab-login').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('tab-register').classList.toggle('hidden', tab !== 'register');
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('login-user').value.trim();
+      const password = document.getElementById('login-pass').value;
+      const errorBox = document.getElementById('login-err');
+
+      errorBox.classList.add('hidden');
+
+      if (!email || !password) {
+        errorBox.textContent = 'Escribe tu email/usuario y contraseña.';
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const data = await api('POST', '/login', { email, password });
+        loginWith(data.usuario);
+      } catch (error) {
+        const demoUser = DEMO_USERS.find(u => u.email === email && u.password === password);
+        if (demoUser) {
+          loginWith({ id: demoUser.id, nombre: demoUser.nombre, email: demoUser.email, rol: demoUser.rol });
+          return;
+        }
+
+        errorBox.textContent = error.error || 'Email o contraseña incorrectos.';
+        errorBox.classList.remove('hidden');
+      }
+    }
+
+    async function doRegister() {
+      const nombre = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-pass').value;
+      const errorBox = document.getElementById('reg-err');
+
+      errorBox.classList.add('hidden');
+
+      if (!nombre || !email || !password) {
+        errorBox.textContent = 'Rellena todos los campos.';
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const data = await api('POST', '/registro', { nombre, email, password });
+        loginWith(data.usuario);
+      } catch (error) {
+        const newUser = {
+          id: Date.now(),
+          nombre,
+          email,
+          rol: 'usuario'
+        };
+        loginWith(newUser);
+      }
+    }
+
+    async function doLogout() {
+      await api('POST', '/logout').catch(() => {});
+
+      currentUser = null;
+      posts = [];
+      concerts = [];
+      allUsers = [];
+      messages = {};
+      currentConv = null;
+
+      hideCookieBanner();
+      document.getElementById('screen-app').classList.remove('active');
+      document.getElementById('screen-auth').classList.add('active');
+      document.getElementById('login-user').value = '';
+      document.getElementById('login-pass').value = '';
+      document.getElementById('login-err').classList.add('hidden');
+      showCookieBannerIfNeeded();
+    }
+
+   function loginWith(user) {
+  currentUser = user;
+
+  currentProfileTab = 'posts'; // 👈 AQUÍ (CORRECTO)
+
+  hideCookieBanner();
+
+  document.getElementById('screen-auth').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+
+  aplicarUsuario();
+  cargarTodo();
+}
+
+    function aplicarUsuario() {
+      const nombre = currentUser.nombre;
+      const isAdmin = currentUser.rol === 'admin';
+
+      setAv(document.getElementById('sidebar-av'), nombre);
+      setAv(document.getElementById('topbar-av'), nombre);
+      setAv(document.getElementById('composer-av'), nombre);
+      setAv(document.getElementById('profile-av'), nombre);
+
+      document.getElementById('sidebar-name').textContent = nombre;
+      document.getElementById('sidebar-role').textContent = isAdmin ? 'Administrador' : 'Oyente';
+      document.getElementById('profile-name').textContent = nombre;
+      document.getElementById('profile-handle').textContent = '@' + (currentUser.email || 'usuario').split('@')[0];
+
+      document.getElementById('admin-nav').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('btn-new-concert').style.display = isAdmin ? 'inline-flex' : 'none';
+
+      updateProfileCookieStatus();
+    }
+
+    async function comprobarSesion() {
+      showCookieBannerIfNeeded();
+
+      try {
+        const data = await api('GET', '/me');
+        loginWith(data.usuario);
+      } catch (_) {
+        // Si el backend no está arrancado, la pantalla de login sigue funcionando en modo demo.
+      }
+    }
+
+    /* =========================================================
+       5. NAVEGACIÓN
+       ========================================================= */
+    function goPage(page, button) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+      document.getElementById('page-' + page).classList.add('active');
+      if (button) button.classList.add('active');
+
+      const titles = {
+        feed: 'Feed',
+        discover: 'Descubrir música',
+        concerts: 'Conciertos',
+        messages: 'Mensajes',
+        profile: 'Mi Perfil',
+        admin: 'Panel Admin'
+      };
+
+      document.getElementById('page-title').textContent = titles[page] || page;
+
+      if (page === 'messages') initMessages();
+     if (page === 'profile') { 
+             renderProfileContent(); 
+            updateProfileCookieStatus(); 
+}
+      if (page === 'admin') cargarAdmin();
+      if (page === 'concerts') renderConcerts();
+      if (page === 'discover') renderDiscover();
+    }
+
+    async function cargarTodo() {
+      await Promise.all([cargarPublicaciones(), cargarConciertos(), cargarUsuarios()]);
+      renderDiscover();
+    }
+
+    /* =========================================================
+       6. PUBLICACIONES
+       ========================================================= */
+    async function cargarPublicaciones() {
+      try {
+        const data = await api('GET', '/publicaciones');
+        posts = data.map(p => ({
+          id: p.id,
+          userId: p.usuario_id,
+          username: p.username || p.nombre || currentUser.nombre,
+          content: p.contenido,
+          tipo: p.tipo || 'general',
+          likes: p.likes || 0,
+          liked: false,
+          fecha: p.fecha || new Date().toISOString(),
+          comments: [],
+          editing: false
+        }));
+      } catch (_) {
+        posts = [];
+      }
+
+      renderPosts();
+      renderProfileContent();
+    }
+
+    function selectType(button, type) {
+      document.querySelectorAll('.type-pill').forEach(b => b.classList.remove('selected'));
+      button.classList.add('selected');
+      postType = type;
+    }
+
+    async function createPost() {
+      const text = document.getElementById('composer-text').value.trim();
+      if (!text) return;
+
+      const localPost = {
+        id: Date.now(),
+        userId: currentUser.id,
+        username: currentUser.nombre,
+        content: text,
+        tipo: postType,
+        likes: 0,
+        liked: false,
+        fecha: new Date().toISOString(),
+        comments: [],
+        editing: false
+      };
+
+      try {
+        const data = await api('POST', '/publicaciones', { contenido: text, tipo: postType });
+        if (data.publicacion?.id) localPost.id = data.publicacion.id;
+      } catch (_) {
+        // Modo demo si no hay backend.
+      }
+
+      posts.unshift(localPost);
+      document.getElementById('composer-text').value = '';
+      renderPosts();
+      renderProfileContent();
+    }
+
+    async function toggleLike(id, isDemo) {
+      const list = isDemo ? DEMO_POSTS : posts;
+      const post = list.find(p => String(p.id) === String(id));
+      if (!post) return;
+
+      if (!isDemo) {
+        await api('POST', `/publicaciones/${id}/like`).catch(() => {});
+      }
+
+      post.liked = !post.liked;
+      post.likes += post.liked ? 1 : -1;
+      renderPosts();
+    }
+
+    async function deletePost(id) {
+      if (!confirm('¿Eliminar esta publicación?')) return;
+
+      await api('DELETE', `/publicaciones/${id}`).catch(() => {});
+      posts = posts.filter(p => String(p.id) !== String(id));
+      renderPosts();
+      renderProfileContent();
+    }
+
+    function startEdit(id) {
+      const post = posts.find(p => String(p.id) === String(id));
+      if (!post) return;
+      post.editing = true;
+      renderPosts();
+    }
+
+    async function saveEdit(id) {
+      const textarea = document.getElementById('edit-' + id);
+      if (!textarea) return;
+
+      const newContent = textarea.value.trim();
+      if (!newContent) return;
+
+      await api('PUT', `/publicaciones/${id}`, { contenido: newContent }).catch(() => {});
+
+      const post = posts.find(p => String(p.id) === String(id));
+      if (post) {
+        post.content = newContent;
+        post.editing = false;
+      }
+
+      renderPosts();
+renderProfileContent();    }
+
+    function cancelEdit(id) {
+      const post = posts.find(p => String(p.id) === String(id));
+      if (!post) return;
+      post.editing = false;
+      renderPosts();
+    }
+
+    function addComment(postId, isDemo) {
+      const input = document.getElementById('cinp-' + postId);
+      if (!input) return;
+
+      const text = input.value.trim();
+      if (!text) return;
+
+      const comment = {
+        id: 'cmt-' + Date.now(),
+        author: currentUser.nombre,
+        text
+      };
+
+      const list = isDemo ? DEMO_POSTS : posts;
+      const post = list.find(p => String(p.id) === String(postId));
+      if (post) post.comments.push(comment);
+
+      input.value = '';
+      renderPosts();
+    }
+
+    function deleteComment(postId, commentId, isDemo) {
+      const list = isDemo ? DEMO_POSTS : posts;
+      const post = list.find(p => String(p.id) === String(postId));
+      if (!post) return;
+
+      post.comments = post.comments.filter(c => String(c.id) !== String(commentId));
+      renderPosts();
+    }
+
+    function buildPostCard(post, isDemo) {
+      const isOwner = !isDemo && (post.userId === currentUser.id || currentUser.rol === 'admin');
+
+      const commentsHTML = post.comments.map(comment => {
+        const canDelete = comment.author === currentUser.nombre;
+        return `
+          <div class="comment-item">
+            <span class="comment-author">${escapeHTML(comment.author)}:</span>
+            <span class="comment-text">${escapeHTML(comment.text)}</span>
+            ${canDelete ? `<span class="comment-del" onclick="deleteComment('${post.id}', '${comment.id}', ${isDemo})">✕</span>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      const contentHTML = post.editing
+        ? `
+          <textarea class="edit-textarea" id="edit-${post.id}">${escapeHTML(post.content)}</textarea>
+          <div class="edit-actions">
+            <button class="btn btn-ghost" style="padding:.3rem .8rem;font-size:.78rem" onclick="cancelEdit('${post.id}')">Cancelar</button>
+            <button class="btn btn-primary" style="padding:.3rem .8rem;font-size:.78rem" onclick="saveEdit('${post.id}')">Guardar</button>
+          </div>
+        `
+        : `<div class="post-content">${escapeHTML(post.content)}</div>`;
+
+      return `
+        <div class="card post-card">
+          <div class="post-header">
+            <div class="avatar av-md" style="background:linear-gradient(135deg, ${avatarColor(post.username)}, #70AAFA); color:#0d0f1a;">
+              ${initials(post.username)}
+            </div>
+            <div class="post-meta">
+              <div class="username">${escapeHTML(post.username)}</div>
+              <div class="timestamp">${formatFecha(post.fecha)}</div>
+            </div>
+            ${typeTag(post.tipo)}
+          </div>
+
+          ${contentHTML}
+
+          <div class="post-actions">
+            <button class="action-btn ${post.liked ? 'liked' : ''}" onclick="toggleLike('${post.id}', ${isDemo})">${post.liked ? '❤️' : '🤍'} ${post.likes}</button>
+            <button class="action-btn">💬 ${post.comments.length}</button>
+            <button class="action-btn">↗ Compartir</button>
+            ${isOwner && !post.editing ? `
+              <button class="action-btn" onclick="startEdit('${post.id}')" style="margin-left:auto">✏️</button>
+              <button class="action-btn" onclick="deletePost('${post.id}')">🗑</button>
+            ` : ''}
+          </div>
+
+          <div class="comments-section">
+            ${commentsHTML}
+            <div class="comment-input-row">
+              <input class="inp" id="cinp-${post.id}" type="text" placeholder="Añadir comentario…" onkeydown="if(event.key==='Enter')addComment('${post.id}', ${isDemo})" />
+              <button class="btn btn-ghost" onclick="addComment('${post.id}', ${isDemo})" style="padding:.4rem .85rem;font-size:.78rem">Enviar</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPosts() {
+      const list = document.getElementById('post-list');
+      const allPosts = [...posts, ...DEMO_POSTS];
+
+      if (!allPosts.length) {
+        list.innerHTML = '<p style="color:var(--sub);text-align:center;padding:2rem">Sé el primero en publicar algo.</p>';
+        return;
+      }
+
+      list.innerHTML = allPosts.map(post => buildPostCard(post, String(post.id).startsWith('d'))).join('');
+    }
+function renderProfileContent() {
+  if (currentProfileTab === 'posts') {
+    renderProfilePosts();
+  }
+
+  if (currentProfileTab === 'playlists') {
+    renderProfilePlaylists();
+  }
+
+  if (currentProfileTab === 'events') {
+    renderProfileEvents();
+  }
+}
+   function renderProfilePosts() {
+  if (!currentUser) return;
+
+  const myPosts = posts.filter(p => p.userId === currentUser.id);
+
+  const samplePosts = [
+  { id: 'pp1', userId: currentUser.id, username: currentUser.nombre, content: 'Acabo de escuchar el nuevo álbum de 5SOS y me ha gustado bastante.', tipo: 'song', likes: 24, liked: false, fecha: new Date(Date.now() - 172800000).toISOString(), comments: [] },
+  { id: 'pp2', userId: currentUser.id, username: currentUser.nombre, content: 'Mi playlist de verano ya está lista. 80 canciones para no parar.', tipo: 'playlist', likes: 41, liked: false, fecha: new Date(Date.now() - 432000000).toISOString(), comments: [] },
+  { id: 'pp3', userId: currentUser.id, username: currentUser.nombre, content: 'Hoy descubriendo música nueva en SoundLink.', tipo: 'general', likes: 12, liked: false, fecha: new Date(Date.now() - 200000000).toISOString(), comments: [] },
+  { id: 'pp4', userId: currentUser.id, username: currentUser.nombre, content: 'Playlist nueva para el gym, puro hype.', tipo: 'playlist', likes: 28, liked: false, fecha: new Date(Date.now() - 300000000).toISOString(), comments: [] },
+  { id: 'pp5', userId: currentUser.id, username: currentUser.nombre, content: 'Me he apuntado mentalmente al concierto de 5SOS en Vistalegre.', tipo: 'event', likes: 36, liked: false, fecha: new Date(Date.now() - 360000000).toISOString(), comments: [] }
+];
+
+      const all = [...myPosts, ...samplePosts];
+      document.getElementById('profile-posts').innerHTML = all.map(post => `
+        <div class="card post-card">
+          <div class="post-header">
+            <div style="display:flex;align-items:center;gap:.5rem;flex:1">
+              ${typeTag(post.tipo)}
+              <span style="font-size:.75rem;color:var(--sub)">${formatFecha(post.fecha)}</span>
+            </div>
+            ${String(post.id).startsWith('pp') ? '' : `<button class="action-btn" onclick="deletePost('${post.id}')">🗑</button>`}
+          </div>
+          <div class="post-content">${escapeHTML(post.content)}</div>
+          <div class="post-actions">
+            <button class="action-btn">${post.liked ? '❤️' : '🤍'} ${post.likes}</button>
+            <button class="action-btn">💬 ${post.comments?.length || 0}</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('stat-posts').textContent = all.length;
+    }
+
+function renderProfilePlaylists() {
+  const container = document.getElementById('profile-posts');
+
+  const playlists = [
+    { nombre: 'Gym motivation', canciones: 25 },
+    { nombre: 'Verano vibes', canciones: 80 },
+    { nombre: 'Chill nocturno', canciones: 40 },
+    { nombre: 'Rap español', canciones: 60 }
+  ];
+
+  container.innerHTML = playlists.map(p => `
+    <div class="card">
+      <div style="font-family:'Syne';font-weight:700">${p.nombre}</div>
+      <div style="color:var(--sub);font-size:.8rem">${p.canciones} canciones</div>
+    </div>
+  `).join('');
+}
+
+function renderProfileEvents() {
+  const container = document.getElementById('profile-posts');
+  const misEventos = concerts.filter(c => c.asistiendo);
+
+  if (!misEventos.length) {
+    container.innerHTML = '<p style="color:var(--sub);padding:2rem;text-align:center">No estás apuntado a ningún evento.</p>';
+    return;
+  }
+
+  container.innerHTML = misEventos.map(c => `
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+      <div>
+        <div style="font-family:'Syne';font-weight:700">${escapeHTML(c.nombre)}</div>
+        <div style="color:var(--sub);font-size:.8rem">${escapeHTML(c.ubicacion)}</div>
+        <div style="color:var(--sub);font-size:.8rem">${escapeHTML(c.fecha)} ${c.hora ? '· ' + escapeHTML(c.hora) : ''}</div>
+      </div>
+
+      <button class="btn btn-ghost" style="padding:.45rem .9rem;font-size:.78rem;color:var(--danger)"
+        onclick="desapuntarseDesdePerfil('${c.id}')">
+        Desapuntarme
+      </button>
+    </div>
+  `).join('');
+}
+
+function desapuntarseDesdePerfil(id) {
+  const concert = concerts.find(c => String(c.id) === String(id));
+  if (!concert) return;
+
+  concert.asistiendo = false;
+  concert.attendees = Math.max((concert.attendees || 0) - 1, 0);
+
+  renderProfileEvents();
+  renderConcerts();
+}
+    /* =========================================================
+       7. CONCIERTOS
+       ========================================================= */
+    async function cargarConciertos() {
+      try {
+        concerts = await api('GET', '/conciertos');
+      } catch (_) {
+        concerts = [...DEMO_CONCERTS];
+      }
+
+      renderConcerts();
+    }
+
+    function renderConcerts() {
+      const grid = document.getElementById('concerts-grid');
+      const isAdmin = currentUser?.rol === 'admin';
+
+      if (!concerts.length) {
+        grid.innerHTML = '<p style="color:var(--sub);text-align:center;padding:2rem;grid-column:1/-1">No hay conciertos disponibles.</p>';
+        return;
+      }
+
+      grid.innerHTML = concerts.map(concert => {
+        const date = new Date(concert.fecha);
+        const day = Number.isNaN(date.getTime()) ? '–' : date.getDate();
+        const month = Number.isNaN(date.getTime()) ? '' : date.toLocaleString('es-ES', { month: 'short' }).toUpperCase();
+
+        return `
+          <div class="concert-card">
+            <div class="concert-date">${day}</div>
+            <div class="concert-month">${month}</div>
+            <div class="concert-name">${escapeHTML(concert.nombre)}</div>
+            <div class="concert-loc">📍 ${escapeHTML(concert.ubicacion || 'Sin ubicación')}</div>
+            <div class="concert-loc">🕘 ${escapeHTML(concert.hora || 'Hora por confirmar')}</div>
+            <div class="concert-footer">
+              <span class="concert-attendees">👥 ${Number(concert.attendees || 0).toLocaleString('es-ES')} asistentes</span>
+              <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+                <button class="btn btn-ghost" style="padding:.3rem .8rem;font-size:.78rem;color:${concert.asistiendo ? 'var(--mint)' : ''}" onclick="asistirConcierto('${concert.id}', this)">
+                  ${concert.asistiendo ? 'Desapuntarme' : 'Apuntarme'}
+                </button>
+                ${isAdmin ? `<button class="btn btn-danger" style="padding:.3rem .7rem;font-size:.78rem" onclick="deleteConcert('${concert.id}')">🗑</button>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function asistirConcierto(id, button) {
+      button.disabled = true;
+
+      try {
+        const data = await api('POST', `/conciertos/${id}/asistir`);
+        const concert = concerts.find(c => String(c.id) === String(id));
+        if (concert) concert.asistiendo = data.asistiendo;
+      } catch (_) {
+        const concert = concerts.find(c => String(c.id) === String(id));
+        if (concert) {
+          concert.asistiendo = !concert.asistiendo;
+          concert.attendees += concert.asistiendo ? 1 : -1;
+        }
+ } finally {
+  button.disabled = false;
+  renderConcerts();
+
+  if (currentProfileTab === 'events') {
+    renderProfileEvents();
+  }
+}
+}
+    function openConcertModal() {
+      document.getElementById('concert-modal').classList.remove('hidden');
+    }
+
+    function closeConcertModal() {
+      document.getElementById('concert-modal').classList.add('hidden');
+      document.getElementById('modal-err').classList.add('hidden');
+    }
+
+    async function createConcert() {
+      const nombre = document.getElementById('c-name').value.trim();
+      const fecha = document.getElementById('c-date').value;
+      const ubicacion = document.getElementById('c-loc').value.trim();
+      const errorBox = document.getElementById('modal-err');
+
+      if (!nombre || !fecha || !ubicacion) {
+        errorBox.textContent = 'Rellena todos los campos.';
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      const newConcert = { id: Date.now(), nombre, fecha, ubicacion, attendees: 0, asistiendo: false };
+
+      try {
+        const data = await api('POST', '/conciertos', { nombre, fecha, ubicacion });
+        concerts.unshift({ ...newConcert, ...data.concierto });
+      } catch (_) {
+        concerts.unshift(newConcert);
+      }
+
+      document.getElementById('c-name').value = '';
+      document.getElementById('c-date').value = '';
+      document.getElementById('c-loc').value = '';
+      closeConcertModal();
+      renderConcerts();
+    }
+
+    async function deleteConcert(id) {
+      if (!confirm('¿Eliminar este concierto?')) return;
+
+      await api('DELETE', `/conciertos/${id}`).catch(() => {});
+      concerts = concerts.filter(c => String(c.id) !== String(id));
+      renderConcerts();
+    }
+
+    /* =========================================================
+       8. USUARIOS Y SUGERENCIAS
+       ========================================================= */
+    async function cargarUsuarios() {
+      try {
+        if (currentUser.rol === 'admin') {
+          allUsers = await api('GET', '/usuarios');
+        } else {
+          allUsers = [
+            { id: 3, nombre: 'Marta García', genero: 'Pop / Indie' },
+            { id: 4, nombre: 'David Morales', genero: 'Rock / Metal' },
+            { id: 5, nombre: 'Noelia Sánchez', genero: 'Hip-Hop / Trap' }
+          ];
+        }
+      } catch (_) {
+        allUsers = [
+          { id: 3, nombre: 'Marta García', email: 'marta@gmail.com', rol: 'usuario', genero: 'Pop / Indie' },
+          { id: 4, nombre: 'David Morales', email: 'david@gmail.com', rol: 'usuario', genero: 'Rock / Metal' },
+          { id: 5, nombre: 'Noelia Sánchez', email: 'noelia@gmail.com', rol: 'usuario', genero: 'Hip-Hop / Trap' }
         ];
+      }
 
-        let mensajesDemo = [
-            {
-                id: 1,
-                de: "Marta",
-                para: "Tú",
-                contenido: "¿Te apetece quedar antes del concierto de Walls y entrar juntos?",
-                tiempo: "Hace 1 hora",
-                esMio: false
-            },
-            {
-                id: 2,
-                de: "Sergio",
-                para: "Tú",
-                contenido: "He visto entradas para BMTH, tenemos que mirarlo.",
-                tiempo: "Hace 3 horas",
-                esMio: false
-            }
-        ];
+      renderSuggestions();
+    }
 
-        const conciertosDemo = [
-            {
-                titulo: "Walls en Madrid",
-                lugar: "WiZink Center",
-                fecha: "20/05/2026",
-                enlace: "#"
-            },
-            {
-                titulo: "Bring Me The Horizon",
-                lugar: "Palacio Vistalegre",
-                fecha: "02/06/2026",
-                enlace: "#"
-            },
-            {
-                titulo: "5SOS Tour",
-                lugar: "Barcelona",
-                fecha: "15/07/2026",
-                enlace: "#"
-            }
-        ];
+    function renderSuggestions() {
+  const demoSuggestions = [
+    { id: 3, nombre: 'Marta García', genero: 'Pop / Indie' },
+    { id: 4, nombre: 'David Morales', genero: 'Rock / Metal' },
+    { id: 5, nombre: 'Noelia Sánchez', genero: 'Hip-Hop / Trap' },
+    { id: 6, nombre: 'Sergio López', genero: 'Metal / Rock Alternativo' },
+    { id: 7, nombre: 'Ana Torres', genero: 'Pop / Reggaetón' },
+    { id: 8, nombre: 'Pablo Ruiz', genero: 'Indie / Electrónica' },
+    { id: 9, nombre: 'Lucía Gómez', genero: 'Rap / Urbano' }
+  ];
 
-        function setCookie(nombre, valor, dias) {
-            const fecha = new Date();
-            fecha.setTime(fecha.getTime() + (dias * 24 * 60 * 60 * 1000));
-            const expires = "expires=" + fecha.toUTCString();
-            document.cookie = nombre + "=" + encodeURIComponent(valor) + ";" + expires + ";path=/";
+  const box = document.getElementById('suggest-list');
+
+  box.innerHTML = demoSuggestions.map(user => {
+    const isFollowing = followedUsers[user.id] || false;
+
+    return `
+      <div class="suggest-item" style="margin-bottom:.75rem">
+        <div class="avatar av-sm" style="background:linear-gradient(135deg, ${avatarColor(user.nombre)}, #70AAFA); color:#0d0f1a;">
+          ${initials(user.nombre)}
+        </div>
+
+        <div class="suggest-info" style="flex:1">
+          <div class="name">${escapeHTML(user.nombre)}</div>
+          <div class="genre">${escapeHTML(user.genero)}</div>
+        </div>
+
+        <button class="btn ${isFollowing ? 'btn-primary' : 'btn-ghost'}"
+          style="padding:.25rem .7rem;font-size:.75rem"
+          onclick="toggleFollowUser(${user.id})">
+          ${isFollowing ? '✓ Siguiendo' : 'Seguir'}
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  updateFollowingCount();
+}
+function toggleFollowUser(id) {
+  if (followedUsers[id]) {
+    followedUsers[id] = false;
+    followingCount--;
+  } else {
+    followedUsers[id] = true;
+    followingCount++;
+  }
+
+  renderSuggestions();
+  updateFollowingCount();
+}
+
+function updateFollowingCount() {
+  const stat = document.getElementById('stat-following');
+  if (stat) stat.textContent = followingCount;
+}
+    /* =========================================================
+       9. MENSAJES
+       ========================================================= */
+    function initMessages() {
+      DEMO_CONVS.forEach(conv => {
+        if (!messages[conv.id]) {
+          messages[conv.id] = {
+            nombre: conv.nombre,
+            lista: conv.messages.map(m => ({
+              emisor_id: m.from === 'me' ? currentUser.id : conv.id,
+              texto: m.texto,
+              fecha: m.fecha
+            }))
+          };
         }
-
-        function getCookie(nombre) {
-            const nombreBuscado = nombre + "=";
-            const cookies = document.cookie.split(";");
-
-            for (let i = 0; i < cookies.length; i++) {
-                let c = cookies[i].trim();
-                if (c.indexOf(nombreBuscado) === 0) {
-                    return decodeURIComponent(c.substring(nombreBuscado.length));
-                }
-            }
-
-            return null;
-        }
-
-        function deleteCookie(nombre) {
-            document.cookie = nombre + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        }
-
-        function actualizarEstadoCookies() {
-            const valor = getCookie("cookiesAceptadas");
-
-            if (valor === "si") {
-                estadoCookiesTexto.textContent = "Aceptadas";
-            } else if (valor === "no") {
-                estadoCookiesTexto.textContent = "Rechazadas";
-            } else {
-                estadoCookiesTexto.textContent = "No decidido";
-            }
-        }
-
-        function revisarBannerCookies() {
-            const valor = getCookie("cookiesAceptadas");
-
-            if (valor === "si" || valor === "no") {
-                cookiesBanner.style.display = "none";
-            } else {
-                cookiesBanner.style.display = "block";
-            }
-        }
-
-        btnAceptarCookies.addEventListener("click", function () {
-            setCookie("cookiesAceptadas", "si", 30);
-            cookiesBanner.style.display = "none";
-            actualizarEstadoCookies();
-        });
-
-        btnRechazarCookies.addEventListener("click", function () {
-            setCookie("cookiesAceptadas", "no", 30);
-            cookiesBanner.style.display = "none";
-            actualizarEstadoCookies();
-        });
-
-        btnCambiarCookies.addEventListener("click", function () {
-            deleteCookie("cookiesAceptadas");
-            revisarBannerCookies();
-            actualizarEstadoCookies();
-        });
-
-        function ocultarSecciones() {
-            seccionFeed.classList.add("oculto");
-            seccionMensajes.classList.add("oculto");
-            seccionConciertos.classList.add("oculto");
-            seccionPerfil.classList.add("oculto");
-        }
-
-        function quitarActivoNav() {
-            navInicio.classList.remove("activo");
-            navMensajes.classList.remove("activo");
-            navConciertos.classList.remove("activo");
-            navPerfil.classList.remove("activo");
-        }
-
-        function mostrarSeccion(seccion) {
-            ocultarSecciones();
-            quitarActivoNav();
-
-            if (seccion === "feed") {
-                seccionFeed.classList.remove("oculto");
-                navInicio.classList.add("activo");
-            }
-
-            if (seccion === "mensajes") {
-                seccionMensajes.classList.remove("oculto");
-                navMensajes.classList.add("activo");
-                cargarMensajes();
-            }
-
-            if (seccion === "conciertos") {
-                seccionConciertos.classList.remove("oculto");
-                navConciertos.classList.add("activo");
-                cargarConciertos();
-            }
-
-            if (seccion === "perfil") {
-                seccionPerfil.classList.remove("oculto");
-                navPerfil.classList.add("activo");
-                actualizarEstadoCookies();
-            }
-        }
-
-        navInicio.addEventListener("click", function () {
-            mostrarSeccion("feed");
-        });
-
-        navMensajes.addEventListener("click", function () {
-            mostrarSeccion("mensajes");
-        });
-
-        navConciertos.addEventListener("click", function () {
-            mostrarSeccion("conciertos");
-        });
-
-        navPerfil.addEventListener("click", function () {
-            mostrarSeccion("perfil");
-        });
-
-        btnLogin.addEventListener("click", function () {
-            const usuario = usuarioLogin.value.trim();
-            const password = passwordLogin.value.trim();
-
-            if (usuario === "" || password === "") {
-                alert("Tienes que escribir un usuario y una contraseña");
-                return;
-            }
-
-            usuarioActual = usuario;
-
-            setCookie("usuarioSoundLink", usuarioActual, 1);
-
-            saludoUsuario.textContent = "Bienvenido, " + usuarioActual;
-            nombrePerfil.textContent = usuarioActual;
-
-            pantallaLogin.classList.remove("activa");
-            pantallaApp.classList.add("activa");
-
-            actualizarEstadoCookies();
-            revisarBannerCookies();
-            mostrarSeccion("feed");
-            cargarPublicaciones();
-            cargarMensajes();
-        });
-
-        function crearHTMLComentarios(comentarios) {
-            let html = "";
-
-            for (let i = 0; i < comentarios.length; i++) {
-                html += "<p>• " + comentarios[i] + "</p>";
-            }
-
-            return html;
-        }
-
-        btnPublicar.addEventListener("click", async function () {
-            const texto = contenidoPublicacion.value.trim();
-
-            if (texto === "") {
-                mensajePublicacion.textContent = "Escribe algo antes de publicar";
-                return;
-            }
-
-            const nuevaPublicacion = {
-                id: Date.now(),
-                usuario: usuarioActual,
-                tiempo: "Hace un momento",
-                contenido: texto,
-                likes: 0,
-                comentarios: ["Sé el primero en comentar."],
-                esMia: true
-            };
-
-            try {
-                await fetch("http://localhost:3000/publicaciones", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        contenido: texto,
-                        usuario_id: 1
-                    })
-                });
-            } catch (error) {
-                console.log("No se pudo guardar en el backend, pero se mostrará en la demo.");
-            }
-
-            publicacionesUsuario.unshift(nuevaPublicacion);
-            contenidoPublicacion.value = "";
-            mensajePublicacion.textContent = "Publicación creada";
-            cargarPublicaciones();
-
-            setTimeout(function () {
-                mensajePublicacion.textContent = "";
-            }, 2500);
-        });
-
-        function cargarPublicaciones() {
-            listaPublicaciones.innerHTML = "";
-
-            const publicacionesTotales = [...publicacionesUsuario, ...publicacionesFake];
-
-            for (let i = 0; i < publicacionesTotales.length; i++) {
-                const pub = publicacionesTotales[i];
-
-                const divPost = document.createElement("div");
-                divPost.className = "post";
-
-                divPost.innerHTML = `
-                    <div class="post-usuario">${pub.usuario}</div>
-                    <div class="post-tiempo">${pub.tiempo}</div>
-                    <div class="post-texto">${pub.contenido}</div>
-                    <div class="acciones-post">
-                        <button class="btn-like">❤️ ${pub.likes}</button>
-                        <button class="btn-comentarios">Comentarios</button>
-                        <button class="btn-borrar">Borrar</button>
-                    </div>
-                    <div class="comentarios">
-                        ${crearHTMLComentarios(pub.comentarios)}
-                    </div>
-                `;
-
-                const btnLike = divPost.querySelector(".btn-like");
-                const btnComentarios = divPost.querySelector(".btn-comentarios");
-                const btnBorrar = divPost.querySelector(".btn-borrar");
-                const cajaComentarios = divPost.querySelector(".comentarios");
-
-                btnLike.addEventListener("click", function () {
-                    pub.likes++;
-                    btnLike.textContent = "❤️ " + pub.likes;
-                });
-
-                btnComentarios.addEventListener("click", function () {
-                    if (cajaComentarios.style.display === "block") {
-                        cajaComentarios.style.display = "none";
-                    } else {
-                        cajaComentarios.style.display = "block";
-                    }
-                });
-
-                btnBorrar.addEventListener("click", async function () {
-                    if (pub.esMia) {
-                        try {
-                            await fetch("http://localhost:3000/publicaciones/" + pub.id, {
-                                method: "DELETE"
-                            });
-                        } catch (error) {
-                            console.log("No se pudo borrar en backend, pero se borra de la demo.");
-                        }
-
-                        publicacionesUsuario = publicacionesUsuario.filter(function (p) {
-                            return p.id !== pub.id;
-                        });
-                    } else {
-                        const index = publicacionesFake.findIndex(function (p) {
-                            return p.id === pub.id;
-                        });
-
-                        if (index !== -1) {
-                            publicacionesFake.splice(index, 1);
-                        }
-                    }
-
-                    cargarPublicaciones();
-                });
-
-                listaPublicaciones.appendChild(divPost);
-            }
-        }
-
-        btnEnviarMensaje.addEventListener("click", function () {
-            const destinatario = destinatarioMensaje.value.trim();
-            const texto = textoMensaje.value.trim();
-
-            if (destinatario === "" || texto === "") {
-                alert("Tienes que escribir destinatario y mensaje");
-                return;
-            }
-
-            const nuevoMensaje = {
-                id: Date.now(),
-                de: usuarioActual,
-                para: destinatario,
-                contenido: texto,
-                tiempo: "Hace un momento",
-                esMio: true
-            };
-
-            mensajesDemo.unshift(nuevoMensaje);
-            destinatarioMensaje.value = "";
-            textoMensaje.value = "";
-            cargarMensajes();
-        });
-
-        function cargarMensajes() {
-            listaMensajes.innerHTML = "";
-
-            if (mensajesDemo.length === 0) {
-                listaMensajes.innerHTML = "<p>No hay mensajes disponibles.</p>";
-                return;
-            }
-
-            for (let i = 0; i < mensajesDemo.length; i++) {
-                const mensaje = mensajesDemo[i];
-
-                const divMensaje = document.createElement("div");
-                divMensaje.className = "mensaje-chat";
-
-                divMensaje.innerHTML = `
-                    <strong>${mensaje.de} → ${mensaje.para}</strong>
-                    <div class="mensaje-tiempo">${mensaje.tiempo}</div>
-                    <p>${mensaje.contenido}</p>
-                    <div class="mensaje-acciones">
-                        <button class="btn-borrar">Borrar mensaje</button>
-                    </div>
-                `;
-
-                const btnBorrarMensaje = divMensaje.querySelector(".btn-borrar");
-
-                btnBorrarMensaje.addEventListener("click", function () {
-                    mensajesDemo = mensajesDemo.filter(function (m) {
-                        return m.id !== mensaje.id;
-                    });
-
-                    cargarMensajes();
-                });
-
-                listaMensajes.appendChild(divMensaje);
-            }
-        }
-
-        function cargarConciertos() {
-            listaConciertosReales.innerHTML = "";
-
-            for (let i = 0; i < conciertosDemo.length; i++) {
-                const concierto = conciertosDemo[i];
-
-                const divEvento = document.createElement("div");
-                divEvento.className = "evento";
-
-                divEvento.innerHTML = `
-                    <h3>${concierto.titulo}</h3>
-                    <p><strong>Lugar:</strong> ${concierto.lugar}</p>
-                    <p><strong>Fecha:</strong> ${concierto.fecha}</p>
-                    <p><a href="${concierto.enlace}" target="_blank">Ver concierto</a></p>
-                `;
-
-                listaConciertosReales.appendChild(divEvento);
-            }
-        }
-
-        function comprobarSesion() {
-            const usuarioGuardado = getCookie("usuarioSoundLink");
-
-            if (usuarioGuardado) {
-                usuarioActual = usuarioGuardado;
-                saludoUsuario.textContent = "Bienvenido, " + usuarioActual;
-                nombrePerfil.textContent = usuarioActual;
-
-                pantallaLogin.classList.remove("activa");
-                pantallaApp.classList.add("activa");
-
-                actualizarEstadoCookies();
-                revisarBannerCookies();
-                mostrarSeccion("feed");
-                cargarPublicaciones();
-                cargarMensajes();
-            } else {
-                actualizarEstadoCookies();
-                revisarBannerCookies();
-            }
-        }
-
-        comprobarSesion();
-    </script>
+      });
+
+      renderConvList();
+    }
+
+    function renderConvList() {
+      const keys = Object.keys(messages);
+      const list = document.getElementById('conv-list');
+
+      if (!keys.length) {
+        list.innerHTML = '<p style="color:var(--sub);font-size:.82rem;padding:.5rem">Sin conversaciones.</p>';
+        return;
+      }
+
+      list.innerHTML = keys.map(key => {
+        const conv = messages[key];
+        const last = conv.lista.slice(-1)[0];
+
+        return `
+          <div class="conv-item ${currentConv === key ? 'active' : ''}" onclick="openConv('${key}')">
+            <div class="avatar av-sm" style="background:linear-gradient(135deg, ${avatarColor(conv.nombre)}, #70AAFA); color:#0d0f1a;">
+              ${initials(conv.nombre)}
+            </div>
+            <div class="conv-info">
+              <div class="conv-name">${escapeHTML(conv.nombre)}</div>
+              <div class="conv-preview">${last ? escapeHTML(last.texto) : 'Sin mensajes aún'}</div>
+            </div>
+            <div class="conv-time">${last ? formatFecha(last.fecha) : ''}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openConv(key) {
+      currentConv = key;
+      const conv = messages[key];
+
+      document.getElementById('chat-name').textContent = conv.nombre;
+      document.getElementById('chat-status').textContent = '● Online';
+      setAv(document.getElementById('chat-av'), conv.nombre, false);
+
+      renderConvList();
+      renderMessages();
+    }
+
+    function renderMessages() {
+      if (!currentConv) return;
+
+      const conv = messages[currentConv];
+      const container = document.getElementById('chat-messages');
+
+      container.innerHTML = conv.lista.length
+        ? conv.lista.map(msg => `
+          <div class="msg ${msg.emisor_id === currentUser.id ? 'sent' : 'recv'}">
+            <div class="msg-bubble">${escapeHTML(msg.texto)}</div>
+            <div class="msg-time">${formatFecha(msg.fecha)}</div>
+          </div>
+        `).join('')
+        : '<p style="color:var(--sub);text-align:center;margin:auto">Comienza una conversación.</p>';
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendMessage() {
+      if (!currentConv) return;
+
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!String(currentConv).startsWith('dm')) {
+        await api('POST', '/mensajes', { receptor_id: currentConv, mensaje: text }).catch(() => {});
+      }
+
+      messages[currentConv].lista.push({
+        emisor_id: currentUser.id,
+        texto: text,
+        fecha: new Date().toISOString()
+      });
+
+      input.value = '';
+      renderMessages();
+      renderConvList();
+    }
+
+    /* =========================================================
+       10. DESCUBRIR
+       ========================================================= */
+    function renderDiscover() {
+     const filters = [
+  ['Todos', 'todo'],
+  ['Pop', 'pop'],
+  ['Rock', 'rock'],
+  ['Rap', 'rap'],
+  ['Indie', 'indie'],
+  ['Reggaetón', 'reggaeton'],
+  ['5SOS', '5sos'],
+  ['Taylor Swift', 'taylor'],
+  ['Natos y Waor', 'natos'],
+  ['Extremoduro', 'extremoduro']
+];
+
+      document.getElementById('discover-filters').innerHTML = filters.map(([label, key]) => `
+        <button class="type-pill ${activeFilter === key ? 'selected' : ''}" onclick="setDiscoverFilter('${key}')">${label}</button>
+      `).join('');
+
+      let filtered = DISCOVER_ARTISTS;
+
+      if (activeFilter !== 'todo') {
+  filtered = DISCOVER_ARTISTS.filter(artist => {
+    if (['pop', 'rock', 'rap', 'indie', 'reggaeton'].includes(activeFilter)) {
+      return artist.genre.toLowerCase().replace('ó', 'o') === activeFilter;
+    }
+
+    return artist.filter === activeFilter;
+  });
+}
+
+      document.getElementById('discover-grid').innerHTML = filtered.map((artist, index) => {
+        const isFollowing = followedArtists[artist.name] || false;
+
+        return `
+          <div class="card discover-card">
+            <div class="discover-banner" style="background:linear-gradient(135deg, ${COLORS[index % COLORS.length]}33, #70AAFA22)">${artist.emoji}</div>
+            <div class="discover-artist">${escapeHTML(artist.name)}</div>
+            <div class="discover-genre">${escapeHTML(artist.genre)}</div>
+            <div class="discover-desc">${escapeHTML(artist.desc)}</div>
+            <div class="discover-follow">
+              <button class="btn ${isFollowing ? 'btn-primary' : 'btn-ghost'}" style="width:100%;margin-top:.5rem;padding:.45rem" onclick="toggleFollow('${artist.name}')">
+                ${isFollowing ? '✓ Siguiendo' : 'Seguir'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('') || '<p style="color:var(--sub);padding:2rem;grid-column:1/-1">Sin resultados.</p>';
+    }
+
+    function setDiscoverFilter(key) {
+      activeFilter = key;
+      renderDiscover();
+    }
+
+    function toggleFollow(name) {
+      followedArtists[name] = !followedArtists[name];
+      renderDiscover();
+    }
+
+    /* =========================================================
+       11. PANEL ADMIN
+       ========================================================= */
+    async function cargarAdmin() {
+      try {
+        allUsers = await api('GET', '/usuarios');
+      } catch (_) {
+        allUsers = [...DEMO_USERS, ...allUsers].filter((user, index, arr) => arr.findIndex(u => u.id === user.id) === index);
+      }
+
+      document.getElementById('admin-stat-users').textContent = allUsers.length;
+      document.getElementById('admin-stat-posts').textContent = posts.length + DEMO_POSTS.length;
+      renderAdminTable(allUsers);
+    }
+
+    function renderAdminTable(lista) {
+      document.getElementById('admin-table').innerHTML = `
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Registrado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(lista || []).map(user => `
+            <tr>
+              <td style="display:flex;align-items:center;gap:.6rem">
+                <div class="avatar av-sm" style="background:linear-gradient(135deg, ${avatarColor(user.nombre)}, #70AAFA); color:#0d0f1a; font-size:.72rem;">
+                  ${initials(user.nombre)}
+                </div>
+                ${escapeHTML(user.nombre)}
+              </td>
+              <td style="color:var(--sub)">${escapeHTML(user.email || '-')}</td>
+              <td><span class="role-tag ${user.rol === 'admin' ? 'role-admin' : 'role-user'}">${user.rol === 'admin' ? 'Admin' : 'Usuario'}</span></td>
+              <td style="color:var(--sub);font-size:.8rem">${formatFecha(user.fecha_reg)}</td>
+              <td>
+                ${user.id !== currentUser.id
+                  ? `<button class="btn btn-danger" style="padding:.25rem .7rem;font-size:.75rem" onclick="eliminarUsuario('${user.id}')">Eliminar</button>`
+                  : '<span style="color:var(--sub);font-size:.78rem">Tú</span>'}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
+    }
+
+    async function eliminarUsuario(id) {
+      if (!confirm('¿Eliminar este usuario?')) return;
+
+      await api('DELETE', `/usuarios/${id}`).catch(() => {});
+      allUsers = allUsers.filter(user => String(user.id) !== String(id));
+      renderAdminTable(allUsers);
+    }
+
+    /* =========================================================
+       12. INICIO
+       ========================================================= */
+    window.addEventListener('DOMContentLoaded', comprobarSesion);
+  </script>
 </body>
 </html>
